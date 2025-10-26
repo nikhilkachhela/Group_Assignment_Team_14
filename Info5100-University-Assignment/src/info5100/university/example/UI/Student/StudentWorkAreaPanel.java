@@ -350,3 +350,61 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
         panelGraduationAudit.add(jScrollPane3, java.awt.BorderLayout.CENTER);
 
         studentTabs.addTab("Graduation Audit", panelGraduationAudit);
+
+
+               // Financial Tab
+        panelFinancial.setLayout(new java.awt.BorderLayout());
+
+        jPanel7.setLayout(new java.awt.GridLayout(3, 1, 5, 5));
+
+        lblCurrentBalance.setText("Current Balance: $0.00");
+        lblCurrentBalance.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel7.add(lblCurrentBalance);
+
+        lblTotalPaid.setText("Total Paid: $0.00");
+        lblTotalPaid.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel7.add(lblTotalPaid);
+
+        lblPaymentStatus.setText("Payment Status: No Outstanding Balance");
+        lblPaymentStatus.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel7.add(lblPaymentStatus);
+
+        panelFinancial.add(jPanel7, java.awt.BorderLayout.PAGE_START);
+
+        btnPayTuition.setText("Pay Tuition");
+        btnPayTuition.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayTuitionActionPerformed(evt);
+            }
+        });
+        jPanel8.add(btnPayTuition);
+
+        btnViewStatement.setText("View Statement");
+        btnViewStatement.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewStatementActionPerformed(evt);
+            }
+        });
+        jPanel8.add(btnViewStatement);
+
+        panelFinancial.add(jPanel8, java.awt.BorderLayout.PAGE_END);
+
+        tblPaymentHistory.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Date", "Description", "Amount", "Type", "Balance After"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane4.setViewportView(tblPaymentHistory);
+
+        panelFinancial.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Financial", panelFinancial);
