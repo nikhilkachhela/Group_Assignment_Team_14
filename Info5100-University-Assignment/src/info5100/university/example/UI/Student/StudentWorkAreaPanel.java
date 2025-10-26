@@ -350,3 +350,535 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
         panelGraduationAudit.add(jScrollPane3, java.awt.BorderLayout.CENTER);
 
         studentTabs.addTab("Graduation Audit", panelGraduationAudit);
+
+
+               // Financial Tab
+        panelFinancial.setLayout(new java.awt.BorderLayout());
+
+        jPanel7.setLayout(new java.awt.GridLayout(3, 1, 5, 5));
+
+        lblCurrentBalance.setText("Current Balance: $0.00");
+        lblCurrentBalance.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel7.add(lblCurrentBalance);
+
+        lblTotalPaid.setText("Total Paid: $0.00");
+        lblTotalPaid.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel7.add(lblTotalPaid);
+
+        lblPaymentStatus.setText("Payment Status: No Outstanding Balance");
+        lblPaymentStatus.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel7.add(lblPaymentStatus);
+
+        panelFinancial.add(jPanel7, java.awt.BorderLayout.PAGE_START);
+
+        btnPayTuition.setText("Pay Tuition");
+        btnPayTuition.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayTuitionActionPerformed(evt);
+            }
+        });
+        jPanel8.add(btnPayTuition);
+
+        btnViewStatement.setText("View Statement");
+        btnViewStatement.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewStatementActionPerformed(evt);
+            }
+        });
+        jPanel8.add(btnViewStatement);
+
+        panelFinancial.add(jPanel8, java.awt.BorderLayout.PAGE_END);
+
+        tblPaymentHistory.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Date", "Description", "Amount", "Type", "Balance After"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane4.setViewportView(tblPaymentHistory);
+
+        panelFinancial.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Financial", panelFinancial);
+
+                // Assignments Tab
+        panelAssignments.setLayout(new java.awt.BorderLayout());
+
+        jLabel5.setText("Select Course:");
+        jPanel9.add(jLabel5);
+
+        cmbAssignmentCourse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbAssignmentCourseActionPerformed(evt);
+            }
+        });
+        jPanel9.add(cmbAssignmentCourse);
+
+        btnRefreshAssignments.setText("Refresh");
+        btnRefreshAssignments.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshAssignmentsActionPerformed(evt);
+            }
+        });
+        jPanel9.add(btnRefreshAssignments);
+
+        panelAssignments.add(jPanel9, java.awt.BorderLayout.PAGE_START);
+
+        btnSubmitAssignment.setText("Submit Assignment");
+        btnSubmitAssignment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSubmitAssignmentActionPerformed(evt);
+            }
+        });
+        jPanel10.add(btnSubmitAssignment);
+
+        btnViewGrades.setText("View Grades");
+        btnViewGrades.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewGradesActionPerformed(evt);
+            }
+        });
+        jPanel10.add(btnViewGrades);
+
+        panelAssignments.add(jPanel10, java.awt.BorderLayout.PAGE_END);
+
+        tblAssignments.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Assignment", "Due Date", "Status", "Grade", "Points", "Feedback"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane5.setViewportView(tblAssignments);
+
+        panelAssignments.add(jScrollPane5, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Assignments", panelAssignments);
+
+        // Profile Tab
+        panelProfile.setLayout(new java.awt.BorderLayout());
+
+        btnEditProfile.setText("Edit Profile");
+        btnEditProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditProfileActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnEditProfile);
+
+        btnSaveProfile.setText("Save Changes");
+        btnSaveProfile.setEnabled(false);
+        btnSaveProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveProfileActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnSaveProfile);
+
+        btnCancelEdit.setText("Cancel");
+        btnCancelEdit.setEnabled(false);
+        btnCancelEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelEditActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnCancelEdit);
+
+        btnLogout.setText("Logout");
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnLogout);
+
+        panelProfile.add(jPanel11, java.awt.BorderLayout.PAGE_END);
+
+        jPanel12.setLayout(new java.awt.GridLayout(7, 2, 10, 10));
+
+        jLabel6.setText("Name:");
+        jPanel12.add(jLabel6);
+        txtName.setEditable(false);
+        jPanel12.add(txtName);
+
+        jLabel7.setText("Student ID:");
+        jPanel12.add(jLabel7);
+        txtStudentId.setEditable(false);
+        jPanel12.add(txtStudentId);
+
+        jLabel8.setText("Email:");
+        jPanel12.add(jLabel8);
+        txtEmail.setEditable(false);
+        jPanel12.add(txtEmail);
+
+        jLabel9.setText("Phone:");
+        jPanel12.add(jLabel9);
+        txtPhone.setEditable(false);
+        jPanel12.add(txtPhone);
+
+        jLabel10.setText("Address:");
+        jPanel12.add(jLabel10);
+        txtAddress.setEditable(false);
+        jPanel12.add(txtAddress);
+
+        jLabel11.setText("Program:");
+        jPanel12.add(jLabel11);
+        txtProgram.setEditable(false);
+        jPanel12.add(txtProgram);
+
+        jLabel12.setText("Academic Advisor:");
+        jPanel12.add(jLabel12);
+        txtAdvisor.setEditable(false);
+        jPanel12.add(txtAdvisor);
+
+        panelProfile.add(jPanel12, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Profile", panelProfile);
+
+        add(studentTabs, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>                        
+
+    // Event Handlers
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {
+        searchCourses();
+    }
+
+    private void btnShowAllActionPerformed(java.awt.event.ActionEvent evt) {
+        loadAvailableCourses();
+    }
+
+    private void btnEnrollActionPerformed(java.awt.event.ActionEvent evt) {
+        enrollInCourse();
+    }
+
+    private void btnDropActionPerformed(java.awt.event.ActionEvent evt) {
+        dropCourse();
+    }
+
+    private void cmbTranscriptSemesterActionPerformed(java.awt.event.ActionEvent evt) {
+        loadTranscript();
+    }
+
+    private void btnExportTranscriptActionPerformed(java.awt.event.ActionEvent evt) {
+        exportTranscript();
+    }
+
+    private void btnPayTuitionActionPerformed(java.awt.event.ActionEvent evt) {
+        payTuition();
+    }
+
+    private void btnViewStatementActionPerformed(java.awt.event.ActionEvent evt) {
+        viewFinancialStatement();
+    }
+
+    private void cmbAssignmentCourseActionPerformed(java.awt.event.ActionEvent evt) {
+        loadAssignments();
+    }
+
+    private void btnRefreshAssignmentsActionPerformed(java.awt.event.ActionEvent evt) {
+        loadAssignments();
+    }
+
+    private void btnSubmitAssignmentActionPerformed(java.awt.event.ActionEvent evt) {
+        submitAssignment();
+    }
+
+    private void btnViewGradesActionPerformed(java.awt.event.ActionEvent evt) {
+        viewGrades();
+    }
+
+    private void btnEditProfileActionPerformed(java.awt.event.ActionEvent evt) {
+        enableProfileEditing(true);
+    }
+
+    private void btnSaveProfileActionPerformed(java.awt.event.ActionEvent evt) {
+        saveProfile();
+    }
+
+    private void btnCancelEditActionPerformed(java.awt.event.ActionEvent evt) {
+        loadProfileData();
+        enableProfileEditing(false);
+    }
+
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
+        logout();
+    }
+
+    // Setup methods
+    private void setupTabs() {
+        // Setup all tabs
+        setupCourseRegistrationTab();
+        setupTranscriptTab();
+        setupGraduationAuditTab();
+        setupFinancialTab();
+        setupAssignmentsTab();
+        setupProfileTab();
+    }
+
+    private void setupCourseRegistrationTab() {
+        cmbRegSemester.addActionListener(evt -> loadAvailableCourses());
+        loadAvailableCourses();
+        updateCreditWarning();
+    }
+
+    private void setupTranscriptTab() {
+        loadTranscript();
+        updateGPAandStanding();
+    }
+
+    private void setupGraduationAuditTab() {
+        loadGraduationAudit();
+    }
+
+    private void setupFinancialTab() {
+        loadFinancialData();
+    }
+
+    private void setupAssignmentsTab() {
+        loadEnrolledCourses();
+        loadAssignments();
+    }
+
+    private void setupProfileTab() {
+        loadProfileData();
+    }
+
+    private void loadStudentInfo() {
+        if (currentStudent != null) {
+            // Set welcome message or student info
+        }
+    }
+
+        // Course Registration Methods
+    private void loadAvailableCourses() {
+        DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
+        model.setRowCount(0);
+        
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        if (semester == null) return;
+        
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) return;
+        
+        // Get student's current enrollments
+        CourseLoad currentLoad = currentStudent.getCourseLoadBySemester(semester);
+        ArrayList<String> enrolledCourseIds = new ArrayList<>();
+        
+        if (currentLoad != null) {
+            for (SeatAssignment sa : currentLoad.getSeatAssignments()) {
+                enrolledCourseIds.add(sa.getAssociatedCourse().getCOurseNumber());
+            }
+        }
+        
+        for (CourseOffer offer : schedule.getSchedule()) {
+            Course course = offer.getSubjectCourse();
+            
+            // Count available seats
+            int availableSeats = 0;
+            for (Seat seat : offer.getSeatList()) {
+                if (!seat.isOccupied()) {
+                    availableSeats++;
+                }
+            }
+            
+            // Get faculty name
+            String facultyName = "TBA";
+            if (offer.getFacultyProfile() != null) {
+                facultyName = "Faculty Assigned";
+            }
+            
+            // Determine enrollment status
+            String status = enrolledCourseIds.contains(course.getCOurseNumber()) ? 
+                           "Enrolled" : "Available";
+            
+            model.addRow(new Object[]{
+                course.getCOurseNumber(),
+                course.getCourseName(),
+                facultyName,
+                course.getCredits(),
+                "Mon/Wed 10-12", // Placeholder schedule
+                availableSeats,
+                status
+            });
+        }
+    }
+
+    private void searchCourses() {
+        String searchType = (String) cmbSearchType.getSelectedItem();
+        String searchText = txtSearch.getText().trim().toLowerCase();
+        
+        if (searchText.isEmpty()) {
+            loadAvailableCourses();
+            return;
+        }
+        
+        DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
+        model.setRowCount(0);
+        
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) return;
+        
+        for (CourseOffer offer : schedule.getSchedule()) {
+            Course course = offer.getSubjectCourse();
+            boolean match = false;
+            
+            switch (searchType) {
+                case "Course ID":
+                    match = course.getCOurseNumber().toLowerCase().contains(searchText);
+                    break;
+                case "Course Name":
+                    match = course.getCourseName().toLowerCase().contains(searchText);
+                    break;
+                case "Instructor":
+                    if (offer.getFacultyProfile() != null) {
+                        match = true; // Simplified - would need faculty name
+                    }
+                    break;
+            }
+            
+            if (match) {
+                // Count available seats
+                int availableSeats = 0;
+                for (Seat seat : offer.getSeatList()) {
+                    if (!seat.isOccupied()) {
+                        availableSeats++;
+                    }
+                }
+                
+                String facultyName = offer.getFacultyProfile() != null ? 
+                                   "Faculty Assigned" : "TBA";
+                
+                model.addRow(new Object[]{
+                    course.getCOurseNumber(),
+                    course.getCourseName(),
+                    facultyName,
+                    course.getCredits(),
+                    "Mon/Wed 10-12",
+                    availableSeats,
+                    "Available"
+                });
+            }
+        }
+    }
+
+    private void enrollInCourse() {
+        int row = tblCourses.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course to enroll!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String courseId = (String) tblCourses.getValueAt(row, 0);
+        String status = (String) tblCourses.getValueAt(row, 6);
+        
+        if (status.equals("Enrolled")) {
+            JOptionPane.showMessageDialog(this,
+                "You are already enrolled in this course!",
+                "Already Enrolled",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        CourseOffer offer = schedule.getCourseOfferByNumber(courseId);
+        
+        if (offer == null) {
+            JOptionPane.showMessageDialog(this,
+                "Course offer not found!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Check credit hour limit
+        CourseLoad currentLoad = currentStudent.getCourseLoadBySemester(semester);
+        if (currentLoad == null) {
+            currentLoad = currentStudent.newCourseLoad(semester);
+        }
+        
+        int currentCredits = 0;
+        for (SeatAssignment sa : currentLoad.getSeatAssignments()) {
+            currentCredits += sa.getAssociatedCourse().getCredits();
+        }
+        
+        Course course = offer.getSubjectCourse();
+        if (currentCredits + course.getCredits() > MAX_CREDITS_PER_SEMESTER) {
+            JOptionPane.showMessageDialog(this,
+                "Cannot enroll! This would exceed the maximum 8 credits per semester.\n" +
+                "Current Credits: " + currentCredits + "\n" +
+                "Course Credits: " + course.getCredits(),
+                "Credit Limit Exceeded",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Enroll the student
+        SeatAssignment enrollment = currentLoad.newSeatAssignment(offer);
+        
+        if (enrollment != null) {
+            // Charge tuition
+            double tuition = course.getCoursePrice();
+            financeManager.chargeTuitionForCourse(
+                currentStudent,
+                tuition,
+                course.getCOurseNumber(),
+                semester
+            );
+            
+            JOptionPane.showMessageDialog(this,
+                "Successfully enrolled in " + course.getCOurseNumber() + "!\n" +
+                "Tuition charged: $" + tuition,
+                "Enrollment Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            loadAvailableCourses();
+            updateCreditWarning();
+            loadFinancialData();
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "No seats available for this course!",
+                "Enrollment Failed",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void dropCourse() {
+        int row = tblCourses.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course to drop!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String courseId = (String) tblCourses.getValueAt(row, 0);
+        String status = (String) tblCourses.getValueAt(row, 6);
+        
+        if (!status.equals("Enrolled")) {
+            JOptionPane.showMessageDialog(this,
+                "You are not enrolled in this course!",
+                "Not Enrolled",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
