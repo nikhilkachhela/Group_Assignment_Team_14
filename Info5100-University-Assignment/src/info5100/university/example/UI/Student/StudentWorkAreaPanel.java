@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  * Student Work Area Panel
- * @author Student Module Developer Nikhil
+ * @author Student Module Developer
  */
 public class StudentWorkAreaPanel extends javax.swing.JPanel {
     
@@ -48,7 +48,7 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
     private static final String CORE_COURSE = "INFO5100";
     private static final int CORE_COURSE_CREDITS = 4;
 
-      
+    
     /**
      * Creates new form StudentWorkAreaPanel
      */
@@ -162,8 +162,7 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
-
-                // Course Registration Tab
+        // Course Registration Tab
         panelCourseRegistration.setLayout(new java.awt.BorderLayout());
 
         jLabel1.setText("Semester:");
@@ -351,8 +350,7 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
 
         studentTabs.addTab("Graduation Audit", panelGraduationAudit);
 
-
-               // Financial Tab
+        // Financial Tab
         panelFinancial.setLayout(new java.awt.BorderLayout());
 
         jPanel7.setLayout(new java.awt.GridLayout(3, 1, 5, 5));
@@ -409,7 +407,7 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
 
         studentTabs.addTab("Financial", panelFinancial);
 
-                // Assignments Tab
+        // Assignments Tab
         panelAssignments.setLayout(new java.awt.BorderLayout());
 
         jLabel5.setText("Select Course:");
@@ -664,7 +662,7 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
         }
     }
 
-        // Course Registration Methods
+    // Course Registration Methods
     private void loadAvailableCourses() {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
         model.setRowCount(0);
@@ -882,3 +880,690 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to drop " + courseId + "?\n" +
+            "You will receive a tuition refund.",
+            "Confirm Drop",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            String semester = (String) cmbRegSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            CourseOffer offer = schedule.getCourseOfferByNumber(courseId);
+            Course course = offer.getSubjectCourse();
+            
+            // Drop the course
+            CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+            if (courseLoad != null) {
+                ArrayList<SeatAssignment> assignments = courseLoad.getSeatAssignments();
+                SeatAssignment toRemove = null;
+                
+                for (SeatAssignment sa : assignments) {
+                    if (sa.getAssociatedCourse().getCOurseNumber().equals(courseId)) {
+                        toRemove = sa;
+                        // Free the seat
+                        sa.getSeat().freeSeat();
+                        break;
+                    }
+                }
+                
+                if (toRemove != null) {
+                    assignments.remove(toRemove);
+                    
+                    // Issue refund
+                    financeManager.issueRefund(
+                        currentStudent,
+                        course.getCoursePrice(),
+                        course.getCOurseNumber(),
+                        semester
+                    );
+                    
+                    JOptionPane.showMessageDialog(this,
+                        "Successfully dropped " + courseId + "!\n" +
+                        "Refund issued: $" + course.getCoursePrice(),
+                        "Course Dropped",
+                        JOptionPane.INFORMATION_MESSAGE);
+                    
+                    loadAvailableCourses();
+                    updateCreditWarning();
+                    loadFinancialData();
+                }
+            }
+        }
+    }
+
+    private void updateCreditWarning() {
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+        
+        int currentCredits = 0;
+        if (courseLoad != null) {
+            for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                currentCredits += sa.getAssociatedCourse().getCredits();
+            }
+        }
+        
+        lblCreditWarning.setText("Current Credits: " + currentCredits + " / " + 
+                                 MAX_CREDITS_PER_SEMESTER + " max per semester");
+        
+        if (currentCredits >= MAX_CREDITS_PER_SEMESTER) {
+            lblCreditWarning.setForeground(Color.RED);
+        } else if (currentCredits >= 6) {
+            lblCreditWarning.setForeground(new Color(255, 140, 0)); // Orange
+        } else {
+            lblCreditWarning.setForeground(Color.BLACK);
+        }
+    }
+
+    // Transcript Methods
+    private void loadTranscript() {
+        DefaultTableModel model = (DefaultTableModel) tblTranscript.getModel();
+        model.setRowCount(0);
+        
+        // Check if tuition is paid
+        TuitionAccount account = financeManager.getStudentAccount(currentStudent);
+        if (account.getBalance() > 0) {
+            JOptionPane.showMessageDialog(this,
+                "Transcript is locked!\n" +
+                "Please pay your outstanding balance of $" + account.getBalance() + 
+                " to view your transcript.",
+                "Payment Required",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String selectedSemester = (String) cmbTranscriptSemester.getSelectedItem();
+        boolean showAll = selectedSemester.equals("All Semesters");
+        
+        double totalQualityPoints = 0;
+        int totalCredits = 0;
+        
+        // Load transcript data (simplified - would need actual grades)
+        String[] semesters = {"Fall2024", "Spring2025"};
+        
+        for (String semester : semesters) {
+            if (!showAll && !semester.equals(selectedSemester)) {
+                continue;
+            }
+            
+            CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+            if (courseLoad == null) continue;
+            
+            double termQualityPoints = 0;
+            int termCredits = 0;
+            
+            for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                Course course = sa.getAssociatedCourse();
+                
+                // Generate sample grade (in real system, would get actual grade)
+                // Generate sample grade (in real system, would get actual grade)
+                String grade = GradeCalculator.getLetterGrade(85.0); // Using 85% as sample
+                double qualityPoints = GradeCalculator.calculateQualityPoints(grade, course.getCredits());
+
+                termQualityPoints += qualityPoints;
+                termCredits += course.getCredits();
+                totalQualityPoints += qualityPoints;
+                totalCredits += course.getCredits();
+
+                double termGPA = GradeCalculator.calculateGPA(termQualityPoints, termCredits);
+                double overallGPA = GradeCalculator.calculateGPA(totalQualityPoints, totalCredits);
+
+                String standing = GradeCalculator.getAcademicStanding(termGPA, overallGPA);
+                
+                model.addRow(new Object[]{
+                    semester,
+                    course.getCOurseNumber(),
+                    course.getCourseName(),
+                    grade,
+                    course.getCredits(),
+                    String.format("%.2f", qualityPoints),
+                    String.format("%.2f", termGPA),
+                    String.format("%.2f", overallGPA),
+                    standing
+                });
+            }
+        }
+        
+        updateGPAandStanding();
+    }
+
+    private String generateSampleGrade() {
+        // Generate random percentage between 70-95
+        double percentage = 70 + (Math.random() * 25);
+        return GradeCalculator.getLetterGrade(percentage);
+    }
+
+
+    // Replace the updateGPAandStanding() method (around line 885) with this:
+    private void updateGPAandStanding() {
+        double totalQualityPoints = 0;
+        int totalCredits = 0;
+        
+        String[] semesters = {"Fall2024", "Spring2025"};
+        for (String semester : semesters) {
+            CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+            if (courseLoad == null) continue;
+            
+            for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                Course course = sa.getAssociatedCourse();
+                // Generate a sample grade using percentage
+                double percentage = 70 + (Math.random() * 25); // Random between 70-95
+                String grade = GradeCalculator.getLetterGrade(percentage);
+                double qualityPoints = GradeCalculator.calculateQualityPoints(grade, course.getCredits());
+                totalQualityPoints += qualityPoints;
+                totalCredits += course.getCredits();
+            }
+        }
+        
+        double overallGPA = GradeCalculator.calculateGPA(totalQualityPoints, totalCredits);
+        
+        lblOverallGPA.setText(String.format("Overall GPA: %.2f", overallGPA));
+        lblTotalCredits.setText("Total Credits: " + totalCredits);
+        
+        // Determine academic standing using overallGPA for both parameters
+        // (since we don't have current term GPA separately here)
+        String standing = GradeCalculator.getAcademicStanding(overallGPA, overallGPA);
+        lblAcademicStanding.setText("Academic Standing: " + standing);
+        
+        // Color code based on standing
+        if (standing.equals("Academic Probation")) {
+            lblAcademicStanding.setForeground(Color.RED);
+        } else if (standing.equals("Academic Warning")) {
+            lblAcademicStanding.setForeground(new Color(255, 140, 0)); // Orange
+        } else {
+            lblAcademicStanding.setForeground(new Color(0, 128, 0)); // Green
+        }
+    }
+
+    private void exportTranscript() {
+        JOptionPane.showMessageDialog(this,
+            "Transcript exported successfully!\n" +
+            "File saved to: ~/Documents/Transcript_" + 
+            new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".pdf",
+            "Export Success",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Graduation Audit Methods
+    private void loadGraduationAudit() {
+        DefaultTableModel model = (DefaultTableModel) tblGradRequirements.getModel();
+        model.setRowCount(0);
+        
+        int completedCredits = 0;
+        boolean coreCompleted = false;
+        
+        // Check all semesters
+        String[] semesters = {"Fall2024", "Spring2025", "Summer2025"};
+        for (String semester : semesters) {
+            CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+            if (courseLoad == null) continue;
+            
+            for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                Course course = sa.getAssociatedCourse();
+                completedCredits += course.getCredits();
+                
+                if (course.getCOurseNumber().equals(CORE_COURSE)) {
+                    coreCompleted = true;
+                }
+            }
+        }
+        
+        int remainingCredits = REQUIRED_CREDIT_HOURS - completedCredits;
+        
+        // Update labels
+        boolean readyToGraduate = (completedCredits >= REQUIRED_CREDIT_HOURS) && coreCompleted;
+        
+        if (readyToGraduate) {
+            lblGradStatus.setText("Graduation Status: READY TO GRADUATE!");
+            lblGradStatus.setForeground(new Color(0, 128, 0));
+        } else {
+            lblGradStatus.setText("Graduation Status: NOT READY");
+            lblGradStatus.setForeground(Color.RED);
+        }
+        
+        lblCreditsCompleted.setText("Credits Completed: " + completedCredits + " / " + REQUIRED_CREDIT_HOURS);
+        lblCreditsRemaining.setText("Credits Remaining: " + remainingCredits);
+        
+        if (coreCompleted) {
+            lblCoreStatus.setText("Core Course (INFO5100): Completed ✓");
+            lblCoreStatus.setForeground(new Color(0, 128, 0));
+        } else {
+            lblCoreStatus.setText("Core Course (INFO5100): Not Completed");
+            lblCoreStatus.setForeground(Color.RED);
+        }
+        
+        // Update progress bar
+        progressBar.setValue(completedCredits);
+        progressBar.setString(completedCredits + " / " + REQUIRED_CREDIT_HOURS + " credits");
+        
+        // Add requirements to table
+        model.addRow(new Object[]{
+            "Total Credit Hours",
+            REQUIRED_CREDIT_HOURS,
+            completedCredits,
+            completedCredits >= REQUIRED_CREDIT_HOURS ? "✓ Complete" : "Incomplete"
+        });
+        
+        model.addRow(new Object[]{
+            "Core Course (INFO5100)",
+            CORE_COURSE_CREDITS + " credits",
+            coreCompleted ? CORE_COURSE_CREDITS : 0,
+            coreCompleted ? "✓ Complete" : "Incomplete"
+        });
+        
+        model.addRow(new Object[]{
+            "Elective Courses",
+            (REQUIRED_CREDIT_HOURS - CORE_COURSE_CREDITS) + " credits",
+            Math.max(0, completedCredits - (coreCompleted ? CORE_COURSE_CREDITS : 0)),
+            "In Progress"
+        });
+        
+        model.addRow(new Object[]{
+            "Minimum GPA",
+            "3.0",
+            "Current: " + String.format("%.2f", calculateOverallGPA()),
+            calculateOverallGPA() >= 3.0 ? "✓ Met" : "Not Met"
+        });
+    }
+
+    private double calculateOverallGPA() {
+    double totalQualityPoints = 0;
+    int totalCredits = 0;
+    
+    String[] semesters = {"Fall2024", "Spring2025", "Summer2025"};
+    for (String semester : semesters) {
+        CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+        if (courseLoad == null) continue;
+        
+        for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+            Course course = sa.getAssociatedCourse();
+            // Generate a sample grade using percentage
+            double percentage = 70 + (Math.random() * 25); // Random between 70-95
+            String grade = GradeCalculator.getLetterGrade(percentage);
+            double qualityPoints = GradeCalculator.calculateQualityPoints(grade, course.getCredits());
+            totalQualityPoints += qualityPoints;
+            totalCredits += course.getCredits();
+        }
+    }
+    
+    return GradeCalculator.calculateGPA(totalQualityPoints, totalCredits);
+}
+
+    // Financial Methods
+    private void loadFinancialData() {
+        DefaultTableModel model = (DefaultTableModel) tblPaymentHistory.getModel();
+        model.setRowCount(0);
+        
+        TuitionAccount account = financeManager.getStudentAccount(currentStudent);
+        
+        double balance = account.getBalance();
+        double totalPaid = account.getTotalPaid();
+        
+        lblCurrentBalance.setText(String.format("Current Balance: $%.2f", balance));
+        lblTotalPaid.setText(String.format("Total Paid: $%.2f", totalPaid));
+        
+        if (balance > 0) {
+            lblPaymentStatus.setText("Payment Status: Outstanding Balance");
+            lblPaymentStatus.setForeground(Color.RED);
+        } else if (balance < 0) {
+            lblPaymentStatus.setText("Payment Status: Credit Balance");
+            lblPaymentStatus.setForeground(new Color(0, 128, 0));
+        } else {
+            lblPaymentStatus.setText("Payment Status: No Outstanding Balance");
+            lblPaymentStatus.setForeground(new Color(0, 128, 0));
+        }
+        
+        // Add payment history (simplified)
+        model.addRow(new Object[]{
+            new SimpleDateFormat("MM/dd/yyyy").format(new Date()),
+            "Tuition Charge - Fall 2024",
+            "$5000.00",
+            "Charge",
+            "$5000.00"
+        });
+        
+        if (totalPaid > 0) {
+            model.addRow(new Object[]{
+                new SimpleDateFormat("MM/dd/yyyy").format(new Date()),
+                "Payment Received",
+                "$" + totalPaid,
+                "Payment",
+                "$" + balance
+            });
+        }
+    }
+
+    private void payTuition() {
+        TuitionAccount account = financeManager.getStudentAccount(currentStudent);
+        double balance = account.getBalance();
+        
+        if (balance <= 0) {
+            JOptionPane.showMessageDialog(this,
+                "No balance to pay!",
+                "No Outstanding Balance",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
+        String input = JOptionPane.showInputDialog(this,
+            "Current Balance: $" + balance + "\n" +
+            "Enter payment amount:",
+            "Pay Tuition",
+            JOptionPane.QUESTION_MESSAGE);
+        
+        if (input != null) {
+            try {
+                double payment = Double.parseDouble(input);
+                
+                if (payment <= 0) {
+                    JOptionPane.showMessageDialog(this,
+                        "Payment amount must be greater than 0!",
+                        "Invalid Amount",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                if (payment > balance) {
+                    payment = balance;
+                }
+                
+                boolean success = financeManager.processPayment(currentStudent, payment);
+                
+                JOptionPane.showMessageDialog(this,
+                    "Payment of $" + payment + " processed successfully!\n" +
+                    "New Balance: $" + (balance - payment),
+                    "Payment Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+                loadFinancialData();
+                
+                // Unlock transcript if balance is paid
+                if (balance - payment <= 0) {
+                    loadTranscript();
+                }
+                
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,
+                    "Please enter a valid amount!",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void viewFinancialStatement() {
+        TuitionAccount account = financeManager.getStudentAccount(currentStudent);
+        
+        String statement = "FINANCIAL STATEMENT\n" +
+                          "==================\n\n" +
+                          "Student: " + "Student Name\n" +
+                          "Date: " + new SimpleDateFormat("MM/dd/yyyy").format(new Date()) + "\n\n" +
+                          "Total Charges: $" + account.getTotalCharged() + "\n" +
+                          "Total Payments: $" + account.getTotalPaid() + "\n" +
+                          "Current Balance: $" + account.getBalance() + "\n\n" +
+                          "Payment Status: " + 
+                          (account.getBalance() > 0 ? "Outstanding" : "Paid in Full");
+        
+        JOptionPane.showMessageDialog(this,
+            statement,
+            "Financial Statement",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Assignment Methods
+    private void loadEnrolledCourses() {
+        cmbAssignmentCourse.removeAllItems();
+        cmbAssignmentCourse.addItem("All Courses");
+        
+        String[] semesters = {"Fall2024", "Spring2025"};
+        for (String semester : semesters) {
+            CourseLoad courseLoad = currentStudent.getCourseLoadBySemester(semester);
+            if (courseLoad == null) continue;
+            
+            for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                Course course = sa.getAssociatedCourse();
+                cmbAssignmentCourse.addItem(course.getCOurseNumber() + " - " + course.getCourseName());
+            }
+        }
+    }
+
+    private void loadAssignments() {
+        DefaultTableModel model = (DefaultTableModel) tblAssignments.getModel();
+        model.setRowCount(0);
+        
+        // Sample assignment data
+        model.addRow(new Object[]{
+            "Assignment 1",
+            "10/30/2025",
+            "Submitted",
+            "A",
+            "95/100",
+            "Excellent work!"
+        });
+        
+        model.addRow(new Object[]{
+            "Assignment 2",
+            "11/15/2025",
+            "Pending",
+            "-",
+            "-",
+            "-"
+        });
+        
+        model.addRow(new Object[]{
+            "Final Project",
+            "12/10/2025",
+            "Not Started",
+            "-",
+            "-",
+            "-"
+        });
+    }
+
+    private void submitAssignment() {
+        int row = tblAssignments.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an assignment!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String status = (String) tblAssignments.getValueAt(row, 2);
+        if (status.equals("Submitted")) {
+            JOptionPane.showMessageDialog(this,
+                "This assignment has already been submitted!",
+                "Already Submitted",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(this,
+            "Assignment submitted successfully!",
+            "Submission Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        tblAssignments.setValueAt("Submitted", row, 2);
+    }
+
+    private void viewGrades() {
+        String selectedCourse = (String) cmbAssignmentCourse.getSelectedItem();
+        
+        String gradeReport = "GRADE REPORT\n" +
+                           "============\n\n" +
+                           "Course: " + selectedCourse + "\n\n" +
+                           "Assignment 1: A (95/100)\n" +
+                           "Assignment 2: Pending\n" +
+                           "Final Project: Not Submitted\n\n" +
+                           "Current Average: 95%\n" +
+                           "Current Grade: A";
+        
+        JOptionPane.showMessageDialog(this,
+            gradeReport,
+            "Grade Report",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Profile Methods
+    private void loadProfileData() {
+        txtName.setText("Student Name");
+        txtStudentId.setText("STU-001");
+        txtEmail.setText("student@northeastern.edu");
+        txtPhone.setText("(617) 555-0100");
+        txtAddress.setText("360 Huntington Ave, Boston, MA");
+        txtProgram.setText("MS Information Systems");
+        txtAdvisor.setText("Dr. Academic Advisor");
+    }
+
+    private void enableProfileEditing(boolean enable) {
+        txtEmail.setEditable(enable);
+        txtPhone.setEditable(enable);
+        txtAddress.setEditable(enable);
+        
+        btnEditProfile.setEnabled(!enable);
+        btnSaveProfile.setEnabled(enable);
+        btnCancelEdit.setEnabled(enable);
+    }
+
+    private void saveProfile() {
+        // Validate inputs
+        String email = txtEmail.getText().trim();
+        String phone = txtPhone.getText().trim();
+        String address = txtAddress.getText().trim();
+        
+        if (email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Please fill in all fields!",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            JOptionPane.showMessageDialog(this,
+                "Please enter a valid email address!",
+                "Invalid Email",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(this,
+            "Profile updated successfully!",
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        enableProfileEditing(false);
+    }
+
+    private void logout() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to logout?",
+            "Confirm Logout",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (authService != null) {
+                authService.logout();
+            }
+            
+            // Clear the card panel
+            cardPanel.removeAll();
+            
+            javax.swing.JLabel logoutLabel = new javax.swing.JLabel(
+                "<html><center>" +
+                "<h1>Logged Out Successfully</h1>" +
+                "<p>Thank you for using the Student Portal</p>" +
+                "</center></html>",
+                javax.swing.JLabel.CENTER
+            );
+            
+            cardPanel.add(logoutLabel);
+            cardPanel.revalidate();
+            cardPanel.repaint();
+        }
+    }
+
+    // Variables declaration - do not modify
+    private javax.swing.JButton btnCancelEdit;
+    private javax.swing.JButton btnDrop;
+    private javax.swing.JButton btnEditProfile;
+    private javax.swing.JButton btnEnroll;
+    private javax.swing.JButton btnExportTranscript;
+    private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnPayTuition;
+    private javax.swing.JButton btnRefreshAssignments;
+    private javax.swing.JButton btnSaveProfile;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnShowAll;
+    private javax.swing.JButton btnSubmitAssignment;
+    private javax.swing.JButton btnViewGrades;
+    private javax.swing.JButton btnViewStatement;
+    private javax.swing.JComboBox<String> cmbAssignmentCourse;
+    private javax.swing.JComboBox<String> cmbRegSemester;
+    private javax.swing.JComboBox<String> cmbSearchType;
+    private javax.swing.JComboBox<String> cmbTranscriptSemester;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JLabel lblAcademicStanding;
+    private javax.swing.JLabel lblCoreStatus;
+    private javax.swing.JLabel lblCreditWarning;
+    private javax.swing.JLabel lblCreditsCompleted;
+    private javax.swing.JLabel lblCreditsRemaining;
+    private javax.swing.JLabel lblCurrentBalance;
+    private javax.swing.JLabel lblGradStatus;
+    private javax.swing.JLabel lblOverallGPA;
+    private javax.swing.JLabel lblPaymentStatus;
+    private javax.swing.JLabel lblTotalCredits;
+    private javax.swing.JLabel lblTotalPaid;
+    private javax.swing.JPanel panelAssignments;
+    private javax.swing.JPanel panelCourseRegistration;
+    private javax.swing.JPanel panelFinancial;
+    private javax.swing.JPanel panelGraduationAudit;
+    private javax.swing.JPanel panelProfile;
+    private javax.swing.JPanel panelTranscript;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JTabbedPane studentTabs;
+    private javax.swing.JTable tblAssignments;
+    private javax.swing.JTable tblCourses;
+    private javax.swing.JTable tblGradRequirements;
+    private javax.swing.JTable tblPaymentHistory;
+    private javax.swing.JTable tblTranscript;
+    private javax.swing.JTextField txtAddress;
+    private javax.swing.JTextField txtAdvisor;
+    private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtPhone;
+    private javax.swing.JTextField txtProgram;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JTextField txtStudentId;
+    // End of variables declaration
+}
