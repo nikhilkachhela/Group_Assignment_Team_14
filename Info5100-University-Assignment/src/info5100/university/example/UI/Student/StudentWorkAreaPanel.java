@@ -663,3 +663,222 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
             // Set welcome message or student info
         }
     }
+
+        // Course Registration Methods
+    private void loadAvailableCourses() {
+        DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
+        model.setRowCount(0);
+        
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        if (semester == null) return;
+        
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) return;
+        
+        // Get student's current enrollments
+        CourseLoad currentLoad = currentStudent.getCourseLoadBySemester(semester);
+        ArrayList<String> enrolledCourseIds = new ArrayList<>();
+        
+        if (currentLoad != null) {
+            for (SeatAssignment sa : currentLoad.getSeatAssignments()) {
+                enrolledCourseIds.add(sa.getAssociatedCourse().getCOurseNumber());
+            }
+        }
+        
+        for (CourseOffer offer : schedule.getSchedule()) {
+            Course course = offer.getSubjectCourse();
+            
+            // Count available seats
+            int availableSeats = 0;
+            for (Seat seat : offer.getSeatList()) {
+                if (!seat.isOccupied()) {
+                    availableSeats++;
+                }
+            }
+            
+            // Get faculty name
+            String facultyName = "TBA";
+            if (offer.getFacultyProfile() != null) {
+                facultyName = "Faculty Assigned";
+            }
+            
+            // Determine enrollment status
+            String status = enrolledCourseIds.contains(course.getCOurseNumber()) ? 
+                           "Enrolled" : "Available";
+            
+            model.addRow(new Object[]{
+                course.getCOurseNumber(),
+                course.getCourseName(),
+                facultyName,
+                course.getCredits(),
+                "Mon/Wed 10-12", // Placeholder schedule
+                availableSeats,
+                status
+            });
+        }
+    }
+
+    private void searchCourses() {
+        String searchType = (String) cmbSearchType.getSelectedItem();
+        String searchText = txtSearch.getText().trim().toLowerCase();
+        
+        if (searchText.isEmpty()) {
+            loadAvailableCourses();
+            return;
+        }
+        
+        DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
+        model.setRowCount(0);
+        
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) return;
+        
+        for (CourseOffer offer : schedule.getSchedule()) {
+            Course course = offer.getSubjectCourse();
+            boolean match = false;
+            
+            switch (searchType) {
+                case "Course ID":
+                    match = course.getCOurseNumber().toLowerCase().contains(searchText);
+                    break;
+                case "Course Name":
+                    match = course.getCourseName().toLowerCase().contains(searchText);
+                    break;
+                case "Instructor":
+                    if (offer.getFacultyProfile() != null) {
+                        match = true; // Simplified - would need faculty name
+                    }
+                    break;
+            }
+            
+            if (match) {
+                // Count available seats
+                int availableSeats = 0;
+                for (Seat seat : offer.getSeatList()) {
+                    if (!seat.isOccupied()) {
+                        availableSeats++;
+                    }
+                }
+                
+                String facultyName = offer.getFacultyProfile() != null ? 
+                                   "Faculty Assigned" : "TBA";
+                
+                model.addRow(new Object[]{
+                    course.getCOurseNumber(),
+                    course.getCourseName(),
+                    facultyName,
+                    course.getCredits(),
+                    "Mon/Wed 10-12",
+                    availableSeats,
+                    "Available"
+                });
+            }
+        }
+    }
+
+    private void enrollInCourse() {
+        int row = tblCourses.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course to enroll!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String courseId = (String) tblCourses.getValueAt(row, 0);
+        String status = (String) tblCourses.getValueAt(row, 6);
+        
+        if (status.equals("Enrolled")) {
+            JOptionPane.showMessageDialog(this,
+                "You are already enrolled in this course!",
+                "Already Enrolled",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String semester = (String) cmbRegSemester.getSelectedItem();
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        CourseOffer offer = schedule.getCourseOfferByNumber(courseId);
+        
+        if (offer == null) {
+            JOptionPane.showMessageDialog(this,
+                "Course offer not found!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Check credit hour limit
+        CourseLoad currentLoad = currentStudent.getCourseLoadBySemester(semester);
+        if (currentLoad == null) {
+            currentLoad = currentStudent.newCourseLoad(semester);
+        }
+        
+        int currentCredits = 0;
+        for (SeatAssignment sa : currentLoad.getSeatAssignments()) {
+            currentCredits += sa.getAssociatedCourse().getCredits();
+        }
+        
+        Course course = offer.getSubjectCourse();
+        if (currentCredits + course.getCredits() > MAX_CREDITS_PER_SEMESTER) {
+            JOptionPane.showMessageDialog(this,
+                "Cannot enroll! This would exceed the maximum 8 credits per semester.\n" +
+                "Current Credits: " + currentCredits + "\n" +
+                "Course Credits: " + course.getCredits(),
+                "Credit Limit Exceeded",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Enroll the student
+        SeatAssignment enrollment = currentLoad.newSeatAssignment(offer);
+        
+        if (enrollment != null) {
+            // Charge tuition
+            double tuition = course.getCoursePrice();
+            financeManager.chargeTuitionForCourse(
+                currentStudent,
+                tuition,
+                course.getCOurseNumber(),
+                semester
+            );
+            
+            JOptionPane.showMessageDialog(this,
+                "Successfully enrolled in " + course.getCOurseNumber() + "!\n" +
+                "Tuition charged: $" + tuition,
+                "Enrollment Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            loadAvailableCourses();
+            updateCreditWarning();
+            loadFinancialData();
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "No seats available for this course!",
+                "Enrollment Failed",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void dropCourse() {
+        int row = tblCourses.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course to drop!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String courseId = (String) tblCourses.getValueAt(row, 0);
+        String status = (String) tblCourses.getValueAt(row, 6);
+        
+        if (!status.equals("Enrolled")) {
+            JOptionPane.showMessageDialog(this,
+                "You are not enrolled in this course!",
+                "Not Enrolled",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
