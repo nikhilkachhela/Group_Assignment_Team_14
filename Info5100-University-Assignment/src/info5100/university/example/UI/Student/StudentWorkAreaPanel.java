@@ -161,3 +161,192 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
         txtAdvisor = new javax.swing.JTextField();
 
         setLayout(new java.awt.BorderLayout());
+
+
+                // Course Registration Tab
+        panelCourseRegistration.setLayout(new java.awt.BorderLayout());
+
+        jLabel1.setText("Semester:");
+        jPanel1.add(jLabel1);
+
+        cmbRegSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Fall2024", "Spring2025", "Summer2025" }));
+        jPanel1.add(cmbRegSemester);
+
+        jLabel2.setText("Search by:");
+        jPanel1.add(jLabel2);
+
+        cmbSearchType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Course ID", "Course Name", "Instructor" }));
+        jPanel1.add(cmbSearchType);
+
+        txtSearch.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel1.add(txtSearch);
+
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnSearch);
+
+        btnShowAll.setText("Show All");
+        btnShowAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnShowAllActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnShowAll);
+
+        panelCourseRegistration.add(jPanel1, java.awt.BorderLayout.PAGE_START);
+
+        btnEnroll.setText("Enroll in Selected Course");
+        btnEnroll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnrollActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnEnroll);
+
+        btnDrop.setText("Drop Selected Course");
+        btnDrop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDropActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnDrop);
+
+        lblCreditWarning.setText("Current Credits: 0 / 8 max per semester");
+        jPanel2.add(lblCreditWarning);
+
+        panelCourseRegistration.add(jPanel2, java.awt.BorderLayout.PAGE_END);
+
+        tblCourses.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Course ID", "Course Name", "Instructor", "Credits", "Schedule", "Seats Available", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tblCourses);
+
+        panelCourseRegistration.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Course Registration", panelCourseRegistration);
+
+        // Transcript Tab
+        panelTranscript.setLayout(new java.awt.BorderLayout());
+
+        jLabel3.setText("View by Semester:");
+        jPanel3.add(jLabel3);
+
+        cmbTranscriptSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All Semesters", "Fall2024", "Spring2025", "Summer2025" }));
+        cmbTranscriptSemester.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbTranscriptSemesterActionPerformed(evt);
+            }
+        });
+        jPanel3.add(cmbTranscriptSemester);
+
+        btnExportTranscript.setText("Export Transcript");
+        btnExportTranscript.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTranscriptActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnExportTranscript);
+
+        panelTranscript.add(jPanel3, java.awt.BorderLayout.PAGE_START);
+
+        jPanel4.setLayout(new java.awt.GridLayout(1, 3, 10, 0));
+
+        lblOverallGPA.setText("Overall GPA: 0.00");
+        lblOverallGPA.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel4.add(lblOverallGPA);
+
+        lblTotalCredits.setText("Total Credits: 0");
+        lblTotalCredits.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel4.add(lblTotalCredits);
+
+        lblAcademicStanding.setText("Academic Standing: Good Standing");
+        lblAcademicStanding.setFont(new java.awt.Font("Segoe UI", 1, 14));
+        jPanel4.add(lblAcademicStanding);
+
+        panelTranscript.add(jPanel4, java.awt.BorderLayout.PAGE_END);
+
+        tblTranscript.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Term", "Course ID", "Course Name", "Grade", "Credits", "Quality Points", "Term GPA", "Overall GPA", "Standing"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tblTranscript);
+
+        panelTranscript.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Transcript", panelTranscript);
+
+        // Graduation Audit Tab
+        panelGraduationAudit.setLayout(new java.awt.BorderLayout());
+
+        jPanel5.setLayout(new java.awt.GridLayout(4, 1, 5, 5));
+
+        lblGradStatus.setText("Graduation Status: NOT READY");
+        lblGradStatus.setFont(new java.awt.Font("Segoe UI", 1, 16));
+        jPanel5.add(lblGradStatus);
+
+        lblCreditsCompleted.setText("Credits Completed: 0 / 32");
+        jPanel5.add(lblCreditsCompleted);
+
+        lblCreditsRemaining.setText("Credits Remaining: 32");
+        jPanel5.add(lblCreditsRemaining);
+
+        lblCoreStatus.setText("Core Course (INFO5100): Not Completed");
+        jPanel5.add(lblCoreStatus);
+
+        panelGraduationAudit.add(jPanel5, java.awt.BorderLayout.PAGE_START);
+
+        jPanel6.setLayout(new java.awt.BorderLayout());
+
+        progressBar.setMaximum(32);
+        progressBar.setStringPainted(true);
+        jPanel6.add(progressBar, java.awt.BorderLayout.CENTER);
+
+        jLabel4.setText("Progress to Graduation:");
+        jPanel6.add(jLabel4, java.awt.BorderLayout.PAGE_START);
+
+        panelGraduationAudit.add(jPanel6, java.awt.BorderLayout.PAGE_END);
+
+        tblGradRequirements.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Requirement", "Required", "Completed", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane3.setViewportView(tblGradRequirements);
+
+        panelGraduationAudit.add(jScrollPane3, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Graduation Audit", panelGraduationAudit);
