@@ -553,3 +553,113 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
         add(studentTabs, java.awt.BorderLayout.CENTER);
     }// </editor-fold>                        
 
+    // Event Handlers
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {
+        searchCourses();
+    }
+
+    private void btnShowAllActionPerformed(java.awt.event.ActionEvent evt) {
+        loadAvailableCourses();
+    }
+
+    private void btnEnrollActionPerformed(java.awt.event.ActionEvent evt) {
+        enrollInCourse();
+    }
+
+    private void btnDropActionPerformed(java.awt.event.ActionEvent evt) {
+        dropCourse();
+    }
+
+    private void cmbTranscriptSemesterActionPerformed(java.awt.event.ActionEvent evt) {
+        loadTranscript();
+    }
+
+    private void btnExportTranscriptActionPerformed(java.awt.event.ActionEvent evt) {
+        exportTranscript();
+    }
+
+    private void btnPayTuitionActionPerformed(java.awt.event.ActionEvent evt) {
+        payTuition();
+    }
+
+    private void btnViewStatementActionPerformed(java.awt.event.ActionEvent evt) {
+        viewFinancialStatement();
+    }
+
+    private void cmbAssignmentCourseActionPerformed(java.awt.event.ActionEvent evt) {
+        loadAssignments();
+    }
+
+    private void btnRefreshAssignmentsActionPerformed(java.awt.event.ActionEvent evt) {
+        loadAssignments();
+    }
+
+    private void btnSubmitAssignmentActionPerformed(java.awt.event.ActionEvent evt) {
+        submitAssignment();
+    }
+
+    private void btnViewGradesActionPerformed(java.awt.event.ActionEvent evt) {
+        viewGrades();
+    }
+
+    private void btnEditProfileActionPerformed(java.awt.event.ActionEvent evt) {
+        enableProfileEditing(true);
+    }
+
+    private void btnSaveProfileActionPerformed(java.awt.event.ActionEvent evt) {
+        saveProfile();
+    }
+
+    private void btnCancelEditActionPerformed(java.awt.event.ActionEvent evt) {
+        loadProfileData();
+        enableProfileEditing(false);
+    }
+
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
+        logout();
+    }
+
+    // Setup methods
+    private void setupTabs() {
+        // Setup all tabs
+        setupCourseRegistrationTab();
+        setupTranscriptTab();
+        setupGraduationAuditTab();
+        setupFinancialTab();
+        setupAssignmentsTab();
+        setupProfileTab();
+    }
+
+    private void setupCourseRegistrationTab() {
+        cmbRegSemester.addActionListener(evt -> loadAvailableCourses());
+        loadAvailableCourses();
+        updateCreditWarning();
+    }
+
+    private void setupTranscriptTab() {
+        loadTranscript();
+        updateGPAandStanding();
+    }
+
+    private void setupGraduationAuditTab() {
+        loadGraduationAudit();
+    }
+
+    private void setupFinancialTab() {
+        loadFinancialData();
+    }
+
+    private void setupAssignmentsTab() {
+        loadEnrolledCourses();
+        loadAssignments();
+    }
+
+    private void setupProfileTab() {
+        loadProfileData();
+    }
+
+    private void loadStudentInfo() {
+        if (currentStudent != null) {
+            // Set welcome message or student info
+        }
+    }
