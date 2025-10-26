@@ -408,3 +408,148 @@ public class StudentWorkAreaPanel extends javax.swing.JPanel {
         panelFinancial.add(jScrollPane4, java.awt.BorderLayout.CENTER);
 
         studentTabs.addTab("Financial", panelFinancial);
+
+                // Assignments Tab
+        panelAssignments.setLayout(new java.awt.BorderLayout());
+
+        jLabel5.setText("Select Course:");
+        jPanel9.add(jLabel5);
+
+        cmbAssignmentCourse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbAssignmentCourseActionPerformed(evt);
+            }
+        });
+        jPanel9.add(cmbAssignmentCourse);
+
+        btnRefreshAssignments.setText("Refresh");
+        btnRefreshAssignments.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshAssignmentsActionPerformed(evt);
+            }
+        });
+        jPanel9.add(btnRefreshAssignments);
+
+        panelAssignments.add(jPanel9, java.awt.BorderLayout.PAGE_START);
+
+        btnSubmitAssignment.setText("Submit Assignment");
+        btnSubmitAssignment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSubmitAssignmentActionPerformed(evt);
+            }
+        });
+        jPanel10.add(btnSubmitAssignment);
+
+        btnViewGrades.setText("View Grades");
+        btnViewGrades.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewGradesActionPerformed(evt);
+            }
+        });
+        jPanel10.add(btnViewGrades);
+
+        panelAssignments.add(jPanel10, java.awt.BorderLayout.PAGE_END);
+
+        tblAssignments.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Assignment", "Due Date", "Status", "Grade", "Points", "Feedback"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane5.setViewportView(tblAssignments);
+
+        panelAssignments.add(jScrollPane5, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Assignments", panelAssignments);
+
+        // Profile Tab
+        panelProfile.setLayout(new java.awt.BorderLayout());
+
+        btnEditProfile.setText("Edit Profile");
+        btnEditProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditProfileActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnEditProfile);
+
+        btnSaveProfile.setText("Save Changes");
+        btnSaveProfile.setEnabled(false);
+        btnSaveProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveProfileActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnSaveProfile);
+
+        btnCancelEdit.setText("Cancel");
+        btnCancelEdit.setEnabled(false);
+        btnCancelEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelEditActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnCancelEdit);
+
+        btnLogout.setText("Logout");
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+        jPanel11.add(btnLogout);
+
+        panelProfile.add(jPanel11, java.awt.BorderLayout.PAGE_END);
+
+        jPanel12.setLayout(new java.awt.GridLayout(7, 2, 10, 10));
+
+        jLabel6.setText("Name:");
+        jPanel12.add(jLabel6);
+        txtName.setEditable(false);
+        jPanel12.add(txtName);
+
+        jLabel7.setText("Student ID:");
+        jPanel12.add(jLabel7);
+        txtStudentId.setEditable(false);
+        jPanel12.add(txtStudentId);
+
+        jLabel8.setText("Email:");
+        jPanel12.add(jLabel8);
+        txtEmail.setEditable(false);
+        jPanel12.add(txtEmail);
+
+        jLabel9.setText("Phone:");
+        jPanel12.add(jLabel9);
+        txtPhone.setEditable(false);
+        jPanel12.add(txtPhone);
+
+        jLabel10.setText("Address:");
+        jPanel12.add(jLabel10);
+        txtAddress.setEditable(false);
+        jPanel12.add(txtAddress);
+
+        jLabel11.setText("Program:");
+        jPanel12.add(jLabel11);
+        txtProgram.setEditable(false);
+        jPanel12.add(txtProgram);
+
+        jLabel12.setText("Academic Advisor:");
+        jPanel12.add(jLabel12);
+        txtAdvisor.setEditable(false);
+        jPanel12.add(txtAdvisor);
+
+        panelProfile.add(jPanel12, java.awt.BorderLayout.CENTER);
+
+        studentTabs.addTab("Profile", panelProfile);
+
+        add(studentTabs, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>                        
+
