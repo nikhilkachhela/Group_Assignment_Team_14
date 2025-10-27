@@ -885,21 +885,385 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
 
     private void btnSetScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSetScheduleActionPerformed
         // TODO add your handling code here:
+        // Validation: Check if row selected
+        int row = tblCourseOffers.getSelectedRow();
+        
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get course info
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        String courseName = (String) tblCourseOffers.getValueAt(row, 1);
+        
+        // Get current values
+        String currentRoom = courseRooms.getOrDefault(courseNumber, "");
+        String currentTime = courseSchedules.getOrDefault(courseNumber, "");
+        
+        // STEP 1: Get room number
+        String room = (String) JOptionPane.showInputDialog(
+            this,
+            "Course: " + courseNumber + " - " + courseName + "\n\n" +
+            "Current Room: " + (currentRoom.isEmpty() ? "Not Set" : currentRoom) + "\n\n" +
+            "Enter room number (e.g., 101, Lab-A):",
+            "Set Room",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            null,
+            currentRoom
+        );
+        
+        if (room == null) return;
+        room = room.trim();
+        
+        // Validation: Room cannot be empty
+        if (room.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Room number cannot be empty!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // STEP 2: Get time schedule
+        String time = (String) JOptionPane.showInputDialog(
+            this,
+            "Course: " + courseNumber + " - " + courseName + "\n\n" +
+            "Current Schedule: " + (currentTime.isEmpty() ? "Not Set" : currentTime) + "\n\n" +
+            "Enter time schedule:\n" +
+            "Examples: Mon/Wed 10-12, Tue/Thu 2-4",
+            "Set Schedule",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            null,
+            currentTime
+        );
+        
+        if (time == null) return;
+        time = time.trim();
+        
+        // Validation: Time cannot be empty
+        if (time.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Schedule cannot be empty!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Save to HashMaps
+        courseRooms.put(courseNumber, room);
+        courseSchedules.put(courseNumber, time);
+        
+        // Show success
+        JOptionPane.showMessageDialog(this,
+            "Room and schedule set successfully!\n\n" +
+            "Course: " + courseNumber + "\n" +
+            "Room: " + room + "\n" +
+            "Schedule: " + time,
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        // Refresh table
+        loadCourseData();
         
     }//GEN-LAST:event_btnSetScheduleActionPerformed
 
     private void btnEnrollStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnrollStudentActionPerformed
         // TODO add your handling code here:
+        String semester = (String) cmbEnrollSemester.getSelectedItem();
+        
+        // Get list of students
+        ArrayList<StudentProfile> students = department.getStudentDirectory().getStudentList();
+        
+        // Validation: Check if students exist
+        if (students.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No students in the system!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // STEP 1: Select student
+        String[] studentOptions = new String[students.size()];
+        for (int i = 0; i < students.size(); i++) {
+            studentOptions[i] = "Student " + (i + 1);
+        }
+        
+        String selectedStudent = (String) JOptionPane.showInputDialog(
+            this,
+            "Select student to enroll:",
+            "Step 1: Choose Student",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            studentOptions,
+            studentOptions[0]
+        );
+        
+        if (selectedStudent == null) return;
+        
+        // Get actual student object
+        int studentIndex = Integer.parseInt(selectedStudent.split(" ")[1]) - 1;
+        StudentProfile student = students.get(studentIndex);
+        
+        // STEP 2: Get available courses
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        
+        // Validation: Check if courses exist
+        if (schedule == null) {
+            JOptionPane.showMessageDialog(this,
+                "No courses available for " + semester + "!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        ArrayList<CourseOffer> allOffers = schedule.getSchedule();
+        
+        if (allOffers.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No course offers for " + semester + "!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Build list of courses with available seats
+        ArrayList<String> availableCourses = new ArrayList<>();
+        ArrayList<CourseOffer> availableOffers = new ArrayList<>();
+        
+        for (CourseOffer offer : allOffers) {
+            Course course = offer.getSubjectCourse();
+            
+            // Count empty seats
+            int emptySeats = 0;
+            for (Seat seat : offer.getSeatList()) {
+                if (!seat.isOccupied()) {
+                    emptySeats++;
+                }
+            }
+            
+            // Only show courses with available seats
+            if (emptySeats > 0) {
+                String option = course.getCOurseNumber() + " - " + 
+                              course.getCourseName() + 
+                              " (" + emptySeats + " seats available)";
+                availableCourses.add(option);
+                availableOffers.add(offer);
+            }
+        }
+        
+        // Validation: Check if any courses have space
+        if (availableCourses.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "All courses are full!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String[] courseOptions = availableCourses.toArray(new String[0]);
+        
+        // Let user select course
+        String selectedCourse = (String) JOptionPane.showInputDialog(
+            this,
+            "Select course for enrollment:",
+            "Step 2: Choose Course",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            courseOptions,
+            courseOptions[0]
+        );
+        
+        if (selectedCourse == null) return;
+        
+        // Get the selected course offer
+        int courseIndex = availableCourses.indexOf(selectedCourse);
+        CourseOffer selectedOffer = availableOffers.get(courseIndex);
+        Course selectedCourseObj = selectedOffer.getSubjectCourse();
+        
+        // STEP 3: Enroll the student
+        
+        // Get or create course load for this semester
+        CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+        if (courseLoad == null) {
+            courseLoad = student.newCourseLoad(semester);
+        }
+        
+        // Create seat assignment (enrolls student)
+        SeatAssignment enrollment = courseLoad.newSeatAssignment(selectedOffer);
+        
+        if (enrollment != null) {
+            // Charge tuition
+            double tuition = selectedCourseObj.getCoursePrice();
+            financeManager.chargeTuitionForCourse(
+                student, 
+                tuition, 
+                selectedCourseObj.getCOurseNumber(), 
+                semester
+            );
+            
+            // Show success
+            JOptionPane.showMessageDialog(this,
+                "Student enrolled successfully!\n\n" +
+                "Student: " + selectedStudent + "\n" +
+                "Course: " + selectedCourseObj.getCOurseNumber() + " - " + 
+                selectedCourseObj.getCourseName() + "\n" +
+                "Semester: " + semester + "\n" +
+                "Tuition Charged: $" + tuition,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            // CRITICAL: Track this enrollment for drop functionality
+            // CRITICAL: Track this enrollment for drop functionality
+            // CRITICAL: Track this enrollment for drop functionality
+            Seat assignedSeat = enrollment.getSeat();
+            
+            // Use the student index we already calculated earlier
+            String rowKey = "STU-" + String.format("%03d", studentIndex + 1);
+            
+            EnrollmentInfo info = new EnrollmentInfo(
+                student, 
+                selectedOffer, 
+                assignedSeat, 
+                semester
+            );
+            enrollmentTracker.put(rowKey, info);
+            // Refresh table
+            loadEnrollmentData();
+            
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Enrollment failed! Please try again.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_btnEnrollStudentActionPerformed
 
     private void btnDropStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDropStudentActionPerformed
         // TODO add your handling code here:
+        int row = tblEnrollment.getSelectedRow();
+
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an enrollment record!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Get data from table
+        String rowKey = (String) tblEnrollment.getValueAt(row, 0);
+        String studentName = (String) tblEnrollment.getValueAt(row, 1);
+        String courseNumber = (String) tblEnrollment.getValueAt(row, 2);
+        String courseName = (String) tblEnrollment.getValueAt(row, 3);
+
+        // Get enrollment info from tracker
+        EnrollmentInfo info = enrollmentTracker.get(rowKey);
+
+        if (info == null) {
+            JOptionPane.showMessageDialog(this,
+                "Enrollment information not found!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Confirm drop
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Drop student from course?\n\n" +
+            "Student: " + studentName + "\n" +
+            "Course: " + courseNumber + " - " + courseName + "\n\n" +
+            "This will:\n" +
+            "- Remove student from course\n" +
+            "- Free up the seat\n" +
+            "- Issue tuition refund\n\n" +
+            "Continue?",
+            "Confirm Drop",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                Course course = info.offer.getSubjectCourse();
+                double refundAmount = course.getCoursePrice();
+
+                // STEP 1: Remove seat assignment from student's course load
+                CourseLoad courseLoad = info.student.getCourseLoadBySemester(info.semester);
+
+                if (courseLoad != null) {
+                    ArrayList<SeatAssignment> assignments = courseLoad.getSeatAssignments();
+                    SeatAssignment toRemove = null;
+
+                    // Find the seat assignment to remove
+                    for (SeatAssignment sa : assignments) {
+                        if (sa.getSeat() == info.seat) {
+                            toRemove = sa;
+                            break;
+                        }
+                    }
+
+                    // Remove it
+                    if (toRemove != null) {
+                        assignments.remove(toRemove);
+                    }
+                }
+
+                // STEP 2: Free the seat (mark as unoccupied)
+                // We need to set the seat as unoccupied and clear the assignment
+                // Since Seat class doesn't have a method for this, we'll use reflection of the seat's fields
+                info.seat.freeSeat();
+
+                // STEP 3: Issue refund
+                financeManager.issueRefund(
+                    info.student,
+                    refundAmount,
+                    course.getCOurseNumber(),
+                    info.semester
+                );
+
+                // STEP 4: Remove from tracker
+                enrollmentTracker.remove(rowKey);
+
+                // Show success
+                JOptionPane.showMessageDialog(this,
+                    "Student dropped successfully!\n\n" +
+                    "Student: " + studentName + "\n" +
+                    "Course: " + courseNumber + "\n" +
+                    "Refund Issued: $" + refundAmount,
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+                // STEP 5: Refresh table (student should disappear!)
+                loadEnrollmentData();
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                    "Error dropping student: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
         
     }//GEN-LAST:event_btnDropStudentActionPerformed
 
     private void btnRefreshCoursesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshCoursesActionPerformed
         // TODO add your handling code here:
+        // Reload course data
+        loadCourseData();
+
+        // Show confirmation message
+        JOptionPane.showMessageDialog(this,
+            "Course data refreshed successfully!",
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
         
     }//GEN-LAST:event_btnRefreshCoursesActionPerformed
 
