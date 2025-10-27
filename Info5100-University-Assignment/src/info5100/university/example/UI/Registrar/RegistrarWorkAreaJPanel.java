@@ -4,6 +4,28 @@
  */
 package info5100.university.example.UI.Registrar;
 
+import info5100.university.example.AccessControl.AuthenticationService;
+import info5100.university.example.AccessControl.UserDirectory;
+import info5100.university.example.CourseCatalog.Course;
+import info5100.university.example.CourseCatalog.CourseCatalog;
+import info5100.university.example.CourseSchedule.CourseLoad;
+import info5100.university.example.CourseSchedule.CourseOffer;
+import info5100.university.example.CourseSchedule.CourseSchedule;
+import info5100.university.example.CourseSchedule.Seat;
+import info5100.university.example.CourseSchedule.SeatAssignment;
+import info5100.university.example.Department.Department;
+import info5100.university.example.Finance.FinanceManager;
+import info5100.university.example.Finance.TuitionAccount;
+import info5100.university.example.Finance.FinancialReport;  // ADD THIS IF MISSING
+import info5100.university.example.Persona.Faculty.FacultyDirectory;
+import info5100.university.example.Persona.Faculty.FacultyProfile;
+import info5100.university.example.Persona.StudentProfile;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;  
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 
 
 
@@ -16,17 +38,44 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     /**
      * Creates new form RegistrarWorkAreaJPanel
      */
+    private Department department;
+    private UserDirectory userDirectory;
+    private FinanceManager financeManager;
+    private JPanel cardPanel;
+    private AuthenticationService authService;
+    private FacultyDirectory facultyDirectory;
+    
+    private HashMap<String, String> courseRooms;
+    private HashMap<String, String> courseSchedules;
+    private final HashMap<String, EnrollmentInfo> enrollmentTracker;
+    // Profile data storage
+    private String savedEmail;
+    private String savedPhone;
+    private String savedOffice;
+    private String savedHours;
+    private String savedDepartment;
     
     
     
-    
-    public RegistrarWorkAreaJPanel() {
+    public RegistrarWorkAreaJPanel(Department dept, UserDirectory userDir, 
+                                   FinanceManager finMgr, 
+                                   JPanel parentCardPanel,
+                                   AuthenticationService auth) {
                 
         
-        
+        this.department = dept;
+        this.userDirectory = userDir;
+        this.financeManager = finMgr;
+        this.cardPanel = parentCardPanel;
+        this.authService = auth;
+        this.facultyDirectory = new FacultyDirectory(dept);
         initComponents();
         
-        
+        setupTab1();
+        setupTab2();
+        setupTab3();
+        setupTab4();
+        setupTab5();
     }
     
     
@@ -499,6 +548,105 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
 
     private void btnCreateOfferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateOfferActionPerformed
         // TODO add your handling code here:
+        // Get course catalog
+        CourseCatalog catalog = department.getCourseCatalog();
+        ArrayList<Course> courses = catalog.getCourseList();
+        
+        // Validation: Check if courses exist
+        if (courses.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No courses available in catalog!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // STEP 1: Let user select a course
+        String[] options = new String[courses.size()];
+        for (int i = 0; i < courses.size(); i++) {
+            Course c = courses.get(i);
+            options[i] = c.getCOurseNumber() + " - " + c.getCourseName();
+        }
+        
+        String selected = (String) JOptionPane.showInputDialog(
+            this,
+            "Select course to offer:",
+            "Step 1: Select Course",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        
+        if (selected == null) return;
+        
+        // Extract course number
+        String courseNumber = selected.split(" - ")[0];
+        
+        // STEP 2: Get enrollment capacity
+        String capacityStr = JOptionPane.showInputDialog(
+            this,
+            "Enter seat capacity (5-50):",
+            "Step 2: Set Capacity",
+            JOptionPane.QUESTION_MESSAGE
+        );
+        
+        if (capacityStr == null) return;
+        
+        // Validate and create offer
+        try {
+            int capacity = Integer.parseInt(capacityStr.trim());
+            
+            // Validation: Check capacity range
+            if (capacity < 5 || capacity > 50) {
+                JOptionPane.showMessageDialog(this,
+                    "Capacity must be between 5 and 50!",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Get or create schedule
+            String semester = (String) cmbSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            
+            if (schedule == null) {
+                schedule = department.newCourseSchedule(semester);
+            }
+            
+            // Create course offer
+            CourseOffer offer = schedule.newCourseOffer(courseNumber);
+            
+            // Validation: Check for duplicates
+            if (offer == null) {
+                JOptionPane.showMessageDialog(this,
+                    "This course already exists in " + semester + "!",
+                    "Duplicate Course",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Generate seats
+            offer.generatSeats(capacity);
+            
+            // Show success message
+            JOptionPane.showMessageDialog(this,
+                "Course offer created successfully!\n\n" +
+                "Course: " + courseNumber + "\n" +
+                "Semester: " + semester + "\n" +
+                "Capacity: " + capacity + " seats",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Refresh table
+            loadCourseData();
+            
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                "Please enter a valid number!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_btnCreateOfferActionPerformed
 
