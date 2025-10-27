@@ -24,6 +24,8 @@ public class AdminWorkAreaPanel extends javax.swing.JPanel {
     private FinanceManager financeManager;
     private JPanel cardPanel;
     private AuthenticationService authService;
+    
+    
 
     public AdminWorkAreaPanel(Department dept, UserDirectory userDir, 
                              FinanceManager finMgr, JPanel cardPanel,
