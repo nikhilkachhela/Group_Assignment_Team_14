@@ -388,6 +388,30 @@ private FacultyProfile findFacultyProfile(User user) {
             }
         }
     }
+
+    String username = user.getUsername();
+    if (username.startsWith("faculty")) {
+        try {
+            int index = 0;
+            if (username.length() > 7) {
+                index = Integer.parseInt(username.substring(7)) - 1;
+            }
+
+            if (index >= 0 && index < faculties.size()) {
+                return faculties.get(index);
+            }
+        } catch (Exception e) {
+            // ignore parse error
+        }
+    }
+
+    // Fallback: first faculty (demo environments often do this)
+    if (!faculties.isEmpty()) {
+        return faculties.get(0);
+    }
+
+    return null;
+}
     
     /**
      * @param args the command line arguments
