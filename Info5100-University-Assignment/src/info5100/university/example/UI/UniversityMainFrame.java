@@ -266,7 +266,29 @@ private void loadWorkArea(User user) {
             break;
             
         case FACULTY:
-            JOptionPane.showMessageDialog(this, "Faculty login successful!");
+            FacultyProfile facultyProfile = findFacultyProfile(user);
+
+            if (facultyProfile != null) {
+                workArea = new FacultyWorkAreaPanel(
+                    department,
+                    userDirectory,
+                    financeManager,
+                    pnlContent,
+                    authService,
+                    facultyProfile
+                );
+
+                JOptionPane.showMessageDialog(this,
+                    "Welcome, Faculty!\nFaculty Portal loaded successfully.",
+                    "Login Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Error: Faculty profile not found!\nPlease contact administrator.",
+                    "Profile Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             break;
             
         case REGISTRAR:
