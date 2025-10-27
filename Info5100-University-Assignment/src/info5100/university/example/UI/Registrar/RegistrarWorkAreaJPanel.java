@@ -4,6 +4,28 @@
  */
 package info5100.university.example.UI.Registrar;
 
+import info5100.university.example.AccessControl.AuthenticationService;
+import info5100.university.example.AccessControl.UserDirectory;
+import info5100.university.example.CourseCatalog.Course;
+import info5100.university.example.CourseCatalog.CourseCatalog;
+import info5100.university.example.CourseSchedule.CourseLoad;
+import info5100.university.example.CourseSchedule.CourseOffer;
+import info5100.university.example.CourseSchedule.CourseSchedule;
+import info5100.university.example.CourseSchedule.Seat;
+import info5100.university.example.CourseSchedule.SeatAssignment;
+import info5100.university.example.Department.Department;
+import info5100.university.example.Finance.FinanceManager;
+import info5100.university.example.Finance.TuitionAccount;
+import info5100.university.example.Finance.FinancialReport;  // ADD THIS IF MISSING
+import info5100.university.example.Persona.Faculty.FacultyDirectory;
+import info5100.university.example.Persona.Faculty.FacultyProfile;
+import info5100.university.example.Persona.StudentProfile;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;  
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 
 
 
@@ -16,14 +38,37 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     /**
      * Creates new form RegistrarWorkAreaJPanel
      */
+    private Department department;
+    private UserDirectory userDirectory;
+    private FinanceManager financeManager;
+    private JPanel cardPanel;
+    private AuthenticationService authService;
+    private FacultyDirectory facultyDirectory;
+    
+    private HashMap<String, String> courseRooms;
+    private HashMap<String, String> courseSchedules;
+    private final HashMap<String, EnrollmentInfo> enrollmentTracker;
+    // Profile data storage
+    private String savedEmail;
+    private String savedPhone;
+    private String savedOffice;
+    private String savedHours;
+    private String savedDepartment;
     
     
     
-    
-    public RegistrarWorkAreaJPanel() {
+    public RegistrarWorkAreaJPanel(Department dept, UserDirectory userDir, 
+                                   FinanceManager finMgr, 
+                                   JPanel parentCardPanel,
+                                   AuthenticationService auth) {
                 
         
-        
+        this.department = dept;
+        this.userDirectory = userDir;
+        this.financeManager = finMgr;
+        this.cardPanel = parentCardPanel;
+        this.authService = auth;
+        this.facultyDirectory = new FacultyDirectory(dept);
         initComponents();
         
         
