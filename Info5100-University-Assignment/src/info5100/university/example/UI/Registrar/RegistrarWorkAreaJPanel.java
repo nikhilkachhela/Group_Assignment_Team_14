@@ -652,36 +652,618 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
 
     private void btnAssignFacultyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAssignFacultyActionPerformed
         // TODO add your handling code here:
+        int row = tblCourseOffers.getSelectedRow();
+        
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course from the table first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get course information
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        String courseName = (String) tblCourseOffers.getValueAt(row, 1);
+        
+        // Get course offer
+        String semester = (String) cmbSemester.getSelectedItem();
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        CourseOffer offer = schedule.getCourseOfferByNumber(courseNumber);
+        
+        // Get faculty list
+        ArrayList<FacultyProfile> faculties = facultyDirectory.getAllFaculty();
+        
+        // Validation: Check if faculty available
+        if (faculties == null || faculties.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No faculty members available!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Create faculty options
+        String[] options = new String[faculties.size()];
+        for (int i = 0; i < faculties.size(); i++) {
+            options[i] = "Faculty " + (i + 1);
+        }
+        
+        // Let user select faculty
+        String selected = (String) JOptionPane.showInputDialog(
+            this,
+            "Assign faculty to: " + courseNumber + " - " + courseName + "\n\nSelect faculty member:",
+            "Assign Faculty",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        
+        if (selected == null) return;
+        
+        // Get selected faculty and assign
+        int index = Integer.parseInt(selected.split(" ")[1]) - 1;
+        FacultyProfile faculty = faculties.get(index);
+        offer.AssignAsTeacher(faculty);
+        
+        // Show success
+        JOptionPane.showMessageDialog(this,
+            "Faculty assigned successfully!\n\n" +
+            "Course: " + courseNumber,
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        // Refresh table
+        loadCourseData();
         
     }//GEN-LAST:event_btnAssignFacultyActionPerformed
 
     private void btnUpdateCapacityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCapacityActionPerformed
         // TODO add your handling code here:
+        // Validation: Check if row selected
+        int row = tblCourseOffers.getSelectedRow();
+        
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get current data
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        int currentCapacity = (int) tblCourseOffers.getValueAt(row, 3);
+        int enrolled = (int) tblCourseOffers.getValueAt(row, 4);
+        
+        // Ask for new capacity
+        String input = JOptionPane.showInputDialog(
+            this,
+            "Course: " + courseNumber + "\n\n" +
+            "Current Capacity: " + currentCapacity + " seats\n" +
+            "Enrolled Students: " + enrolled + " students\n\n" +
+            "Enter new capacity (minimum " + enrolled + "):",
+            "Update Capacity",
+            JOptionPane.QUESTION_MESSAGE
+        );
+        
+        if (input == null) return;
+        
+        try {
+            int newCapacity = Integer.parseInt(input.trim());
+            
+            // Validation: Check minimum
+            if (newCapacity < enrolled) {
+                JOptionPane.showMessageDialog(this,
+                    "New capacity cannot be less than enrolled students!",
+                    "Invalid Capacity",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Validation: Check range
+            if (newCapacity < 5 || newCapacity > 100) {
+                JOptionPane.showMessageDialog(this,
+                    "Capacity must be between 5 and 100!",
+                    "Invalid Range",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Update capacity
+            String semester = (String) cmbSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            CourseOffer offer = schedule.getCourseOfferByNumber(courseNumber);
+            
+            // Add seats if needed
+            int seatsToAdd = newCapacity - currentCapacity;
+            if (seatsToAdd > 0) {
+                offer.generatSeats(seatsToAdd);
+            }
+            
+            // Show success
+            JOptionPane.showMessageDialog(this,
+                "Capacity updated successfully!\n\n" +
+                "Course: " + courseNumber + "\n" +
+                "Old: " + currentCapacity + " → New: " + newCapacity,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Refresh table
+            loadCourseData();
+            
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                "Please enter a valid number!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_btnUpdateCapacityActionPerformed
 
     private void btnDeleteOfferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteOfferActionPerformed
         // TODO add your handling code here:
+        // Validation: Check if user selected a row from table
+        int row = tblCourseOffers.getSelectedRow();
+
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course from the table first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Get course information from selected row
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        String courseName = (String) tblCourseOffers.getValueAt(row, 1);
+        int enrolled = (int) tblCourseOffers.getValueAt(row, 4);
+
+        // Validation: Cannot delete if students are enrolled
+        // Must drop all students first to maintain data integrity
+        if (enrolled > 0) {
+            JOptionPane.showMessageDialog(this,
+                "Cannot delete this course!\n\n" +
+                "Course: " + courseNumber + "\n" +
+                "Enrolled Students: " + enrolled + "\n\n" +
+                "Please drop all students before deleting the course.",
+                "Cannot Delete",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Ask user to confirm deletion
+        // This prevents accidental deletions
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete this course?\n\n" +
+            "Course: " + courseNumber + "\n" +
+            "Name: " + courseName + "\n\n" +
+            "This action cannot be undone.",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        // If user clicked "Yes", proceed with deletion
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Get current semester and course schedule
+            String semester = (String) cmbSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+
+            // Attempt to delete the course offer from backend
+            boolean deleted = schedule.deleteCourseOffer(courseNumber);
+
+            if (deleted) {
+                // Deletion successful - also remove room and schedule data
+                courseRooms.remove(courseNumber);
+                courseSchedules.remove(courseNumber);
+
+                // Show success message
+                JOptionPane.showMessageDialog(this,
+                    "Course deleted successfully!\n\n" +
+                    "Course: " + courseNumber + "\n" +
+                    "Semester: " + semester,
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+                // Refresh table to reflect deletion
+                loadCourseData();
+
+            } else {
+                // Deletion failed - course not found
+                JOptionPane.showMessageDialog(this,
+                    "Failed to delete course!\n\n" +
+                    "Course may have already been removed.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+                }
+            }
     
     }//GEN-LAST:event_btnDeleteOfferActionPerformed
 
     private void btnSetScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSetScheduleActionPerformed
         // TODO add your handling code here:
+        // Validation: Check if row selected
+        int row = tblCourseOffers.getSelectedRow();
+        
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get course info
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        String courseName = (String) tblCourseOffers.getValueAt(row, 1);
+        
+        // Get current values
+        String currentRoom = courseRooms.getOrDefault(courseNumber, "");
+        String currentTime = courseSchedules.getOrDefault(courseNumber, "");
+        
+        // STEP 1: Get room number
+        String room = (String) JOptionPane.showInputDialog(
+            this,
+            "Course: " + courseNumber + " - " + courseName + "\n\n" +
+            "Current Room: " + (currentRoom.isEmpty() ? "Not Set" : currentRoom) + "\n\n" +
+            "Enter room number (e.g., 101, Lab-A):",
+            "Set Room",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            null,
+            currentRoom
+        );
+        
+        if (room == null) return;
+        room = room.trim();
+        
+        // Validation: Room cannot be empty
+        if (room.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Room number cannot be empty!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // STEP 2: Get time schedule
+        String time = (String) JOptionPane.showInputDialog(
+            this,
+            "Course: " + courseNumber + " - " + courseName + "\n\n" +
+            "Current Schedule: " + (currentTime.isEmpty() ? "Not Set" : currentTime) + "\n\n" +
+            "Enter time schedule:\n" +
+            "Examples: Mon/Wed 10-12, Tue/Thu 2-4",
+            "Set Schedule",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            null,
+            currentTime
+        );
+        
+        if (time == null) return;
+        time = time.trim();
+        
+        // Validation: Time cannot be empty
+        if (time.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Schedule cannot be empty!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Save to HashMaps
+        courseRooms.put(courseNumber, room);
+        courseSchedules.put(courseNumber, time);
+        
+        // Show success
+        JOptionPane.showMessageDialog(this,
+            "Room and schedule set successfully!\n\n" +
+            "Course: " + courseNumber + "\n" +
+            "Room: " + room + "\n" +
+            "Schedule: " + time,
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        // Refresh table
+        loadCourseData();
         
     }//GEN-LAST:event_btnSetScheduleActionPerformed
 
     private void btnEnrollStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnrollStudentActionPerformed
         // TODO add your handling code here:
+        String semester = (String) cmbEnrollSemester.getSelectedItem();
+        
+        // Get list of students
+        ArrayList<StudentProfile> students = department.getStudentDirectory().getStudentList();
+        
+        // Validation: Check if students exist
+        if (students.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No students in the system!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // STEP 1: Select student
+        String[] studentOptions = new String[students.size()];
+        for (int i = 0; i < students.size(); i++) {
+            studentOptions[i] = "Student " + (i + 1);
+        }
+        
+        String selectedStudent = (String) JOptionPane.showInputDialog(
+            this,
+            "Select student to enroll:",
+            "Step 1: Choose Student",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            studentOptions,
+            studentOptions[0]
+        );
+        
+        if (selectedStudent == null) return;
+        
+        // Get actual student object
+        int studentIndex = Integer.parseInt(selectedStudent.split(" ")[1]) - 1;
+        StudentProfile student = students.get(studentIndex);
+        
+        // STEP 2: Get available courses
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        
+        // Validation: Check if courses exist
+        if (schedule == null) {
+            JOptionPane.showMessageDialog(this,
+                "No courses available for " + semester + "!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        ArrayList<CourseOffer> allOffers = schedule.getSchedule();
+        
+        if (allOffers.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No course offers for " + semester + "!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Build list of courses with available seats
+        ArrayList<String> availableCourses = new ArrayList<>();
+        ArrayList<CourseOffer> availableOffers = new ArrayList<>();
+        
+        for (CourseOffer offer : allOffers) {
+            Course course = offer.getSubjectCourse();
+            
+            // Count empty seats
+            int emptySeats = 0;
+            for (Seat seat : offer.getSeatList()) {
+                if (!seat.isOccupied()) {
+                    emptySeats++;
+                }
+            }
+            
+            // Only show courses with available seats
+            if (emptySeats > 0) {
+                String option = course.getCOurseNumber() + " - " + 
+                              course.getCourseName() + 
+                              " (" + emptySeats + " seats available)";
+                availableCourses.add(option);
+                availableOffers.add(offer);
+            }
+        }
+        
+        // Validation: Check if any courses have space
+        if (availableCourses.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "All courses are full!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String[] courseOptions = availableCourses.toArray(new String[0]);
+        
+        // Let user select course
+        String selectedCourse = (String) JOptionPane.showInputDialog(
+            this,
+            "Select course for enrollment:",
+            "Step 2: Choose Course",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            courseOptions,
+            courseOptions[0]
+        );
+        
+        if (selectedCourse == null) return;
+        
+        // Get the selected course offer
+        int courseIndex = availableCourses.indexOf(selectedCourse);
+        CourseOffer selectedOffer = availableOffers.get(courseIndex);
+        Course selectedCourseObj = selectedOffer.getSubjectCourse();
+        
+        // STEP 3: Enroll the student
+        
+        // Get or create course load for this semester
+        CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+        if (courseLoad == null) {
+            courseLoad = student.newCourseLoad(semester);
+        }
+        
+        // Create seat assignment (enrolls student)
+        SeatAssignment enrollment = courseLoad.newSeatAssignment(selectedOffer);
+        
+        if (enrollment != null) {
+            // Charge tuition
+            double tuition = selectedCourseObj.getCoursePrice();
+            financeManager.chargeTuitionForCourse(
+                student, 
+                tuition, 
+                selectedCourseObj.getCOurseNumber(), 
+                semester
+            );
+            
+            // Show success
+            JOptionPane.showMessageDialog(this,
+                "Student enrolled successfully!\n\n" +
+                "Student: " + selectedStudent + "\n" +
+                "Course: " + selectedCourseObj.getCOurseNumber() + " - " + 
+                selectedCourseObj.getCourseName() + "\n" +
+                "Semester: " + semester + "\n" +
+                "Tuition Charged: $" + tuition,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            // CRITICAL: Track this enrollment for drop functionality
+            // CRITICAL: Track this enrollment for drop functionality
+            // CRITICAL: Track this enrollment for drop functionality
+            Seat assignedSeat = enrollment.getSeat();
+            
+            // Use the student index we already calculated earlier
+            String rowKey = "STU-" + String.format("%03d", studentIndex + 1);
+            
+            EnrollmentInfo info = new EnrollmentInfo(
+                student, 
+                selectedOffer, 
+                assignedSeat, 
+                semester
+            );
+            enrollmentTracker.put(rowKey, info);
+            // Refresh table
+            loadEnrollmentData();
+            
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Enrollment failed! Please try again.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_btnEnrollStudentActionPerformed
 
     private void btnDropStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDropStudentActionPerformed
         // TODO add your handling code here:
+        int row = tblEnrollment.getSelectedRow();
+
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select an enrollment record!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Get data from table
+        String rowKey = (String) tblEnrollment.getValueAt(row, 0);
+        String studentName = (String) tblEnrollment.getValueAt(row, 1);
+        String courseNumber = (String) tblEnrollment.getValueAt(row, 2);
+        String courseName = (String) tblEnrollment.getValueAt(row, 3);
+
+        // Get enrollment info from tracker
+        EnrollmentInfo info = enrollmentTracker.get(rowKey);
+
+        if (info == null) {
+            JOptionPane.showMessageDialog(this,
+                "Enrollment information not found!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Confirm drop
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Drop student from course?\n\n" +
+            "Student: " + studentName + "\n" +
+            "Course: " + courseNumber + " - " + courseName + "\n\n" +
+            "This will:\n" +
+            "- Remove student from course\n" +
+            "- Free up the seat\n" +
+            "- Issue tuition refund\n\n" +
+            "Continue?",
+            "Confirm Drop",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                Course course = info.offer.getSubjectCourse();
+                double refundAmount = course.getCoursePrice();
+
+                // STEP 1: Remove seat assignment from student's course load
+                CourseLoad courseLoad = info.student.getCourseLoadBySemester(info.semester);
+
+                if (courseLoad != null) {
+                    ArrayList<SeatAssignment> assignments = courseLoad.getSeatAssignments();
+                    SeatAssignment toRemove = null;
+
+                    // Find the seat assignment to remove
+                    for (SeatAssignment sa : assignments) {
+                        if (sa.getSeat() == info.seat) {
+                            toRemove = sa;
+                            break;
+                        }
+                    }
+
+                    // Remove it
+                    if (toRemove != null) {
+                        assignments.remove(toRemove);
+                    }
+                }
+
+                // STEP 2: Free the seat (mark as unoccupied)
+                // We need to set the seat as unoccupied and clear the assignment
+                // Since Seat class doesn't have a method for this, we'll use reflection of the seat's fields
+                info.seat.freeSeat();
+
+                // STEP 3: Issue refund
+                financeManager.issueRefund(
+                    info.student,
+                    refundAmount,
+                    course.getCOurseNumber(),
+                    info.semester
+                );
+
+                // STEP 4: Remove from tracker
+                enrollmentTracker.remove(rowKey);
+
+                // Show success
+                JOptionPane.showMessageDialog(this,
+                    "Student dropped successfully!\n\n" +
+                    "Student: " + studentName + "\n" +
+                    "Course: " + courseNumber + "\n" +
+                    "Refund Issued: $" + refundAmount,
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+                // STEP 5: Refresh table (student should disappear!)
+                loadEnrollmentData();
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                    "Error dropping student: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
         
     }//GEN-LAST:event_btnDropStudentActionPerformed
 
     private void btnRefreshCoursesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshCoursesActionPerformed
         // TODO add your handling code here:
+        // Reload course data
+        loadCourseData();
+
+        // Show confirmation message
+        JOptionPane.showMessageDialog(this,
+            "Course data refreshed successfully!",
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
         
     }//GEN-LAST:event_btnRefreshCoursesActionPerformed
 
