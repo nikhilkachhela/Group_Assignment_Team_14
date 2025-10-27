@@ -1936,7 +1936,288 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
             }
         }
         
+        private void setupTab5() {
+            // Load profile data
+            loadProfileData();
+
+            // Disable all fields initially
+            setProfileFieldsEditable(false);
+
+            // Setup button actions
+            btnEditProfile.addActionListener(evt -> {
+                setProfileFieldsEditable(true);
+                btnEditProfile.setEnabled(false);
+                btnSaveProfile.setEnabled(true);
+                btnCancelProfile.setEnabled(true);
+            });
+
+            btnSaveProfile.addActionListener(evt -> saveProfileData());
+
+            btnCancelProfile.addActionListener(evt -> {
+                loadProfileData(); // Reload original data
+                setProfileFieldsEditable(false);
+                btnEditProfile.setEnabled(true);
+                btnSaveProfile.setEnabled(false);
+                btnCancelProfile.setEnabled(false);
+            });
+
+            btnLogout.addActionListener(evt -> logout());
+
+            // Initially disable save and cancel buttons
+            btnSaveProfile.setEnabled(false);
+            btnCancelProfile.setEnabled(false);
+}
+        private void loadProfileData() {
+            // Get current user from auth service
+            String username = "registrar";
+            if (authService != null && authService.getCurrentUser() != null) {
+                username = authService.getCurrentUser().getUsername();
+            }
+
+            // Initialize saved values if they don't exist (first time load)
+            if (savedEmail == null) {
+                savedEmail = username + "@northeastern.edu";
+                savedPhone = "(617) 373-2000";
+                savedOffice = "Richards Hall, Room 220";
+                savedHours = "Mon-Fri: 9:00 AM - 5:00 PM";
+                savedDepartment = "Information Systems";
+            }
+
+            // Load data (either original or previously saved)
+            txtProfileName.setText("Registrar Office");
+            txtProfileId.setText("REG-001");
+            txtProfileEmail.setText(savedEmail);
+            txtProfilePhone.setText(savedPhone);
+            txtProfileOffice.setText(savedOffice);
+            txtProfileHours.setText(savedHours);
+            txtProfileDepartment.setText(savedDepartment);
+        }
         
+        private void setProfileFieldsEditable(boolean editable) {
+            // Name and ID are never editable
+            txtProfileName.setEditable(false);
+            txtProfileId.setEditable(false);
+
+            // These fields can be edited
+            txtProfileEmail.setEditable(editable);
+            txtProfilePhone.setEditable(editable);
+            txtProfileOffice.setEditable(editable);
+            txtProfileHours.setEditable(editable);
+            txtProfileDepartment.setEditable(editable);
+
+            // Visual feedback
+            if (editable) {
+                txtProfileEmail.setBackground(java.awt.Color.WHITE);
+                txtProfilePhone.setBackground(java.awt.Color.WHITE);
+                txtProfileOffice.setBackground(java.awt.Color.WHITE);
+                txtProfileHours.setBackground(java.awt.Color.WHITE);
+                txtProfileDepartment.setBackground(java.awt.Color.WHITE);
+            } else {
+                java.awt.Color lightGray = new java.awt.Color(240, 240, 240);
+                txtProfileEmail.setBackground(lightGray);
+                txtProfilePhone.setBackground(lightGray);
+                txtProfileOffice.setBackground(lightGray);
+                txtProfileHours.setBackground(lightGray);
+                txtProfileDepartment.setBackground(lightGray);
+            }
+}
+    
+        private void saveProfileData() {
+            // Get trimmed values
+            String email = txtProfileEmail.getText().trim();
+            String phone = txtProfilePhone.getText().trim();
+            String office = txtProfileOffice.getText().trim();
+            String hours = txtProfileHours.getText().trim();
+            String dept = txtProfileDepartment.getText().trim();
+
+            // VALIDATION 1: Check for empty fields
+            if (email.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Email cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileEmail.requestFocus();
+                return;
+            }
+
+            if (phone.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Phone number cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfilePhone.requestFocus();
+                return;
+            }
+
+            if (office.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Office location cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileOffice.requestFocus();
+                return;
+            }
+
+            if (hours.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Office hours cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileHours.requestFocus();
+                return;
+            }
+
+            // VALIDATION 2: Email format validation
+            if (!isValidEmail(email)) {
+                JOptionPane.showMessageDialog(this,
+                    "Invalid email format!\n\n" +
+                    "Please enter a valid email address.\n" +
+                    "Example: registrar@northeastern.edu",
+                    "Invalid Email",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileEmail.requestFocus();
+                txtProfileEmail.selectAll();
+                return;
+            }
+
+            // VALIDATION 3: Phone number validation
+            if (!isValidPhone(phone)) {
+                JOptionPane.showMessageDialog(this,
+                    "Invalid phone number format!\n\n" +
+                    "Accepted formats:\n" +
+                    "• (617) 373-2000\n" +
+                    "• 617-373-2000\n" +
+                    "• 6173732000\n" +
+                    "• +1 617-373-2000",
+                    "Invalid Phone Number",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfilePhone.requestFocus();
+                txtProfilePhone.selectAll();
+                return;
+            }
+
+            // SAVE THE DATA (store in class variables so it persists)
+            savedEmail = email;
+            savedPhone = phone;
+            savedOffice = office;
+            savedHours = hours;
+            savedDepartment = dept;
+
+            // Show success message
+            JOptionPane.showMessageDialog(this,
+                "Profile updated successfully!\n\n" +
+                "Email: " + email + "\n" +
+                "Phone: " + phone + "\n" +
+                "Office: " + office + "\n" +
+                "Hours: " + hours + "\n" +
+                "Department: " + dept,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+
+            // Disable editing
+            setProfileFieldsEditable(false);
+            btnEditProfile.setEnabled(true);
+            btnSaveProfile.setEnabled(false);
+            btnCancelProfile.setEnabled(false);
+        }
+        
+        
+        private boolean isValidEmail(String email) {
+            if (email == null || email.isEmpty()) {
+                return false;
+            }
+
+            // Basic email validation regex
+            // Matches: username@domain.extension
+            String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
+            return email.matches(emailRegex);
+}
+
+        /**
+         * Validate phone number format
+         * Accepts multiple formats:
+         * - (617) 373-2000
+         * - 617-373-2000
+         * - 6173732000
+         * - +1 617-373-2000
+         * - +1-617-373-2000
+         */
+        private boolean isValidPhone(String phone) {
+            if (phone == null || phone.isEmpty()) {
+                return false;
+            }
+
+            // Remove all spaces, dashes, parentheses, and plus signs for counting
+            String digitsOnly = phone.replaceAll("[\\s\\-()\\+]", "");
+
+            // Must have 10 or 11 digits (11 if includes country code)
+            if (digitsOnly.length() < 10 || digitsOnly.length() > 11) {
+                return false;
+            }
+
+            // Must contain only digits after removing formatting
+            if (!digitsOnly.matches("\\d+")) {
+                return false;
+            }
+
+            // Valid phone number patterns
+            String[] patterns = {
+                "^\\(\\d{3}\\)\\s?\\d{3}-\\d{4}$",           // (617) 373-2000 or (617)373-2000
+                "^\\d{3}-\\d{3}-\\d{4}$",                     // 617-373-2000
+                "^\\d{10}$",                                  // 6173732000
+                "^\\+1\\s?\\d{3}-\\d{3}-\\d{4}$",            // +1 617-373-2000
+                "^\\+1-\\d{3}-\\d{3}-\\d{4}$",               // +1-617-373-2000
+                "^\\+1\\(\\d{3}\\)\\s?\\d{3}-\\d{4}$"        // +1(617) 373-2000
+            };
+
+            for (String pattern : patterns) {
+                if (phone.matches(pattern)) {
+                    return true;
+                }
+            }
+
+            return false;
+}
+    
+        private void logout() {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to logout?",
+                "Confirm Logout",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                // Perform logout
+                if (authService != null) {
+                    authService.logout();
+                }
+
+                // Clear the card panel and show logout message
+                cardPanel.removeAll();
+
+                javax.swing.JLabel logoutLabel = new javax.swing.JLabel(
+                    "<html><center>" +
+                    "<h1>Logged Out Successfully</h1>" +
+                    "<p>Thank you for using the Northeastern MSIS Portal</p>" +
+                    "<p>Please close this window or restart the application to login again.</p>" +
+                    "</center></html>",
+                    javax.swing.JLabel.CENTER
+                );
+                logoutLabel.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+
+                cardPanel.add(logoutLabel);
+                cardPanel.revalidate();
+                cardPanel.repaint();
+
+                // Show confirmation
+                JOptionPane.showMessageDialog(this,
+                    "You have been logged out successfully.",
+                    "Logged Out",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+}
+
     
     
     
