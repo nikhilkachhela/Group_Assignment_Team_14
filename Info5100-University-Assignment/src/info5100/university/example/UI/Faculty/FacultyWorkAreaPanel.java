@@ -1207,4 +1207,32 @@ private void saveProfile() {
     enableProfileEditing(false);
 }
 
+private void logout() {
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Are you sure you want to logout?",
+        "Confirm Logout",
+        JOptionPane.YES_NO_OPTION);
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        if (authService != null) {
+            authService.logout();
+        }
+
+        cardPanel.removeAll();
+
+        JLabel logoutLabel = new JLabel(
+            "<html><center>" +
+            "<h1>Logged Out Successfully</h1>" +
+            "<p>Thank you for using the Faculty Portal</p>" +
+            "</center></html>",
+            JLabel.CENTER
+        );
+
+        cardPanel.add(logoutLabel);
+        cardPanel.revalidate();
+        cardPanel.repaint();
+    }
+}
+
+
   

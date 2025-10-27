@@ -4,6 +4,10 @@
  */
 package info5100.university.example.UI;
 
+import info5100.university.example.UI.Faculty.FacultyWorkAreaPanel;
+import info5100.university.example.Persona.Faculty.FacultyProfile;
+
+
 import info5100.university.example.AccessControl.*;
 import info5100.university.example.DataGenerator;
 import info5100.university.example.Department.Department;
