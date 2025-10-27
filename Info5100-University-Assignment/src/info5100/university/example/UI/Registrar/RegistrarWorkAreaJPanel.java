@@ -1671,6 +1671,271 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
                 JOptionPane.INFORMATION_MESSAGE);
         }
         
+        private void setupTab4() {
+            // Populate report type dropdown
+            cmbReportType.removeAllItems();
+            cmbReportType.addItem("Enrollment by Course");
+            cmbReportType.addItem("Course Capacity Analysis");
+            cmbReportType.addItem("Student Distribution");
+
+            // Populate semester dropdown
+            cmbReportSemester.removeAllItems();
+            cmbReportSemester.addItem("Fall2024");
+            cmbReportSemester.addItem("Spring2025");
+            cmbReportSemester.addItem("Summer2025");
+            cmbReportSemester.addItem("Fall2025");
+
+            // Add action listener to generate button
+            btnGenerateReportData.addActionListener(evt -> generateReport());
+
+            // Load initial report
+            generateReport();
+        }
+        
+        private void generateReport() {
+            String reportType = (String) cmbReportType.getSelectedItem();
+            String semester = (String) cmbReportSemester.getSelectedItem();
+
+            if (reportType == null || semester == null) return;
+
+            // Clear table
+            DefaultTableModel model = (DefaultTableModel) tblReports.getModel();
+            model.setRowCount(0);
+
+            // Generate appropriate report based on type
+            switch (reportType) {
+                case "Enrollment by Course":
+                    generateEnrollmentReport(semester, model);
+                    break;
+                case "Course Capacity Analysis":
+                    generateCapacityReport(semester, model);
+                    break;
+                case "Student Distribution":
+                    generateStudentDistributionReport(semester, model);
+                    break;
+            }
+        }
+        
+        private void generateEnrollmentReport(String semester, DefaultTableModel model) {
+            // Get course schedule
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            if (schedule == null) {
+                JOptionPane.showMessageDialog(this,
+                    "No courses scheduled for " + semester,
+                    "No Data",
+                    JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            int totalEnrollments = 0;
+            int totalCapacity = 0;
+
+            // Loop through each course offer
+            for (CourseOffer offer : schedule.getSchedule()) {
+                Course course = offer.getSubjectCourse();
+
+                // Count enrolled students
+                int enrolled = 0;
+                int capacity = offer.getSeatList().size();
+
+                for (Seat seat : offer.getSeatList()) {
+                    if (seat.isOccupied()) {
+                        enrolled++;
+                    }
+                }
+
+                totalEnrollments += enrolled;
+                totalCapacity += capacity;
+
+                // Calculate percentage
+                double percentage = capacity > 0 ? (enrolled * 100.0 / capacity) : 0.0;
+
+                // Determine status
+                String status;
+                if (enrolled == 0) {
+                    status = "Empty";
+                } else if (enrolled >= capacity) {
+                    status = "Full";
+                } else if (percentage >= 80) {
+                    status = "Nearly Full";
+                } else {
+                    status = "Available";
+                }
+
+                // Add row
+                model.addRow(new Object[]{
+                    course.getCOurseNumber(),
+                    course.getCourseName(),
+                    enrolled + "/" + capacity,
+                    String.format("%.1f%%", percentage),
+                    status
+                });
+            }
+
+            // Add summary row
+            if (totalCapacity > 0) {
+                double overallPercentage = (totalEnrollments * 100.0 / totalCapacity);
+                model.addRow(new Object[]{
+                    "TOTAL",
+                    "All Courses",
+                    totalEnrollments + "/" + totalCapacity,
+                    String.format("%.1f%%", overallPercentage),
+                    ""
+                });
+            }
+        }
+        
+        private void generateCapacityReport(String semester, DefaultTableModel model) {
+            // Get course schedule
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            if (schedule == null) return;
+
+            int fullCourses = 0;
+            int nearlyFullCourses = 0;
+            int availableCourses = 0;
+            int emptyCourses = 0;
+
+            // Analyze each course
+            for (CourseOffer offer : schedule.getSchedule()) {
+                int enrolled = 0;
+                int capacity = offer.getSeatList().size();
+
+                for (Seat seat : offer.getSeatList()) {
+                    if (seat.isOccupied()) {
+                        enrolled++;
+                    }
+                }
+
+                double percentage = capacity > 0 ? (enrolled * 100.0 / capacity) : 0.0;
+
+                if (enrolled == 0) {
+                    emptyCourses++;
+                } else if (enrolled >= capacity) {
+                    fullCourses++;
+                } else if (percentage >= 80) {
+                    nearlyFullCourses++;
+                } else {
+                    availableCourses++;
+                }
+            }
+
+            int totalCourses = schedule.getSchedule().size();
+
+            // Add rows
+            model.addRow(new Object[]{
+                "Full Courses",
+                fullCourses,
+                totalCourses,
+                String.format("%.1f%%", totalCourses > 0 ? (fullCourses * 100.0 / totalCourses) : 0),
+                "At capacity"
+            });
+
+            model.addRow(new Object[]{
+                "Nearly Full (80%+)",
+                nearlyFullCourses,
+                totalCourses,
+                String.format("%.1f%%", totalCourses > 0 ? (nearlyFullCourses * 100.0 / totalCourses) : 0),
+                "High demand"
+            });
+
+            model.addRow(new Object[]{
+                "Available (<80%)",
+                availableCourses,
+                totalCourses,
+                String.format("%.1f%%", totalCourses > 0 ? (availableCourses * 100.0 / totalCourses) : 0),
+                "Seats available"
+            });
+
+            model.addRow(new Object[]{
+                "Empty Courses",
+                emptyCourses,
+                totalCourses,
+                String.format("%.1f%%", totalCourses > 0 ? (emptyCourses * 100.0 / totalCourses) : 0),
+                "No enrollments"
+            });
+        }
+        
+        private void generateStudentDistributionReport(String semester, DefaultTableModel model) {
+            // Get all students
+            ArrayList<StudentProfile> allStudents = department.getStudentDirectory().getStudentList();
+
+            int studentsEnrolled = 0;
+            int studentsNotEnrolled = 0;
+            int totalCoursesTaken = 0;
+
+            HashMap<Integer, Integer> courseLoadDistribution = new HashMap<>();
+
+            // Analyze each student
+            for (StudentProfile student : allStudents) {
+                CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+
+                if (courseLoad == null || courseLoad.getSeatAssignments().isEmpty()) {
+                    studentsNotEnrolled++;
+                    courseLoadDistribution.put(0, courseLoadDistribution.getOrDefault(0, 0) + 1);
+                } else {
+                    studentsEnrolled++;
+                    int courseCount = courseLoad.getSeatAssignments().size();
+                    totalCoursesTaken += courseCount;
+                    courseLoadDistribution.put(courseCount, courseLoadDistribution.getOrDefault(courseCount, 0) + 1);
+                }
+            }
+
+            int totalStudents = allStudents.size();
+
+            // Overall statistics
+            model.addRow(new Object[]{
+                "Total Students",
+                totalStudents,
+                totalStudents,
+                "100.0%",
+                "All students in system"
+            });
+
+            model.addRow(new Object[]{
+                "Students Enrolled",
+                studentsEnrolled,
+                totalStudents,
+                String.format("%.1f%%", totalStudents > 0 ? (studentsEnrolled * 100.0 / totalStudents) : 0),
+                "Taking at least 1 course"
+            });
+
+            model.addRow(new Object[]{
+                "Students Not Enrolled",
+                studentsNotEnrolled,
+                totalStudents,
+                String.format("%.1f%%", totalStudents > 0 ? (studentsNotEnrolled * 100.0 / totalStudents) : 0),
+                "Not taking any courses"
+            });
+
+            // Average courses per student
+            double avgCourses = studentsEnrolled > 0 ? (totalCoursesTaken * 1.0 / studentsEnrolled) : 0;
+            model.addRow(new Object[]{
+                "Avg Courses/Student",
+                String.format("%.1f", avgCourses),
+                "-",
+                "-",
+                "For enrolled students"
+            });
+
+            // Course load distribution
+            for (Map.Entry<Integer, Integer> entry : courseLoadDistribution.entrySet()) {
+                int courses = entry.getKey();
+                int count = entry.getValue();
+
+                String category = courses == 0 ? "0 courses" : 
+                                 courses == 1 ? "1 course" : 
+                                 courses + " courses";
+
+                model.addRow(new Object[]{
+                    category,
+                    count,
+                    totalStudents,
+                    String.format("%.1f%%", totalStudents > 0 ? (count * 100.0 / totalStudents) : 0),
+                    "Course load"
+                });
+            }
+        }
+        
         
     
     
