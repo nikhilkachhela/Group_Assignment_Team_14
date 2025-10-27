@@ -1157,5 +1157,54 @@ private void loadTuitionInsights() {
     lblRevenuePerCourse.setText(String.format("Average Revenue per Course: $%.2f", avgRevenue));
 }
 
+private void loadProfileData() {
+    txtFacultyName.setText("Faculty Name");
+    txtFacultyId.setText("FAC-001");
+    txtFacultyEmail.setText("faculty@northeastern.edu");
+    txtFacultyPhone.setText("(617) 555-0200");
+    txtFacultyOffice.setText("West Village H, Room 340");
+    txtFacultyDepartment.setText("Information Systems");
+    txtOfficeHours.setText("Mon/Wed 2:00-4:00 PM");
+}
+
+private void enableProfileEditing(boolean enable) {
+    txtFacultyEmail.setEditable(enable);
+    txtFacultyPhone.setEditable(enable);
+    txtFacultyOffice.setEditable(enable);
+    txtOfficeHours.setEditable(enable);
+
+    btnEditProfile.setEnabled(!enable);
+    btnSaveProfile.setEnabled(enable);
+    btnCancelEdit.setEnabled(enable);
+}
+private void saveProfile() {
+    String email = txtFacultyEmail.getText().trim();
+    String phone = txtFacultyPhone.getText().trim();
+    String office = txtFacultyOffice.getText().trim();
+    String hours = txtOfficeHours.getText().trim();
+
+    if (email.isEmpty() || phone.isEmpty() || office.isEmpty() || hours.isEmpty()) {
+        JOptionPane.showMessageDialog(this,
+            "Please fill in all fields!",
+            "Validation Error",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        JOptionPane.showMessageDialog(this,
+            "Please enter a valid email address!",
+            "Invalid Email",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Profile updated successfully!",
+        "Success",
+        JOptionPane.INFORMATION_MESSAGE);
+
+    enableProfileEditing(false);
+}
 
   
