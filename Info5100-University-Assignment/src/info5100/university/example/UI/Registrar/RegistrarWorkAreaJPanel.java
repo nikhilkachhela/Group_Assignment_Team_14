@@ -69,6 +69,10 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
         this.cardPanel = parentCardPanel;
         this.authService = auth;
         this.facultyDirectory = new FacultyDirectory(dept);
+        
+        this.courseRooms = new HashMap<>();
+        this.courseSchedules = new HashMap<>();
+        this.enrollmentTracker = new HashMap<>();
         initComponents();
         
         setupTab1();
