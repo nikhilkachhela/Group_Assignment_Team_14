@@ -4,6 +4,9 @@
  */
 package info5100.university.example.UI.Registrar;
 
+
+
+
 /**
  *
  * @author dives
@@ -13,9 +16,20 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     /**
      * Creates new form RegistrarWorkAreaJPanel
      */
+    
+    
+    
+    
     public RegistrarWorkAreaJPanel() {
+                
+        
+        
         initComponents();
+        
+        
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,19 +40,577 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 640, Short.MAX_VALUE)
+        registrarTabs = new javax.swing.JTabbedPane();
+        panelCourseOfferings = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        cmbSemester = new javax.swing.JComboBox<>();
+        btnSetSchedule = new javax.swing.JButton();
+        btnRefreshCourses = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        btnCreateOffer = new javax.swing.JButton();
+        btnAssignFaculty = new javax.swing.JButton();
+        btnUpdateCapacity = new javax.swing.JButton();
+        btnDeleteOffer = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblCourseOffers = new javax.swing.JTable();
+        panelEnrollment = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        cmbEnrollSemester = new javax.swing.JComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        cmbEnrollCourse = new javax.swing.JComboBox<>();
+        jPanel4 = new javax.swing.JPanel();
+        btnEnrollStudent = new javax.swing.JButton();
+        btnDropStudent = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblEnrollment = new javax.swing.JTable();
+        panelFinancials = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        cmbFinancialSemester = new javax.swing.JComboBox<>();
+        btnRefreshFinancial = new javax.swing.JButton();
+        btnGenerateReport = new javax.swing.JButton();
+        jPanel6 = new javax.swing.JPanel();
+        lblTotalRevenue = new javax.swing.JLabel();
+        lblTotalOutstanding = new javax.swing.JLabel();
+        lblPaymentRate = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tblFinancials = new javax.swing.JTable();
+        panelReports = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        cmbReportType = new javax.swing.JComboBox<>();
+        jLabel6 = new javax.swing.JLabel();
+        cmbReportSemester = new javax.swing.JComboBox<>();
+        btnGenerateReportData = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tblReports = new javax.swing.JTable();
+        panelProfile = new javax.swing.JPanel();
+        jPanel9 = new javax.swing.JPanel();
+        btnEditProfile = new javax.swing.JButton();
+        btnSaveProfile = new javax.swing.JButton();
+        btnCancelProfile = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
+        jPanel10 = new javax.swing.JPanel();
+        jLabel14 = new javax.swing.JLabel();
+        txtProfileName = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
+        txtProfileId = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        txtProfileEmail = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        txtProfilePhone = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        txtProfileOffice = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
+        txtProfileHours = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        txtProfileDepartment = new javax.swing.JTextField();
+
+        setLayout(new java.awt.BorderLayout());
+
+        panelCourseOfferings.setLayout(new java.awt.BorderLayout());
+
+        jLabel1.setText("Semester");
+        jPanel1.add(jLabel1);
+
+        cmbSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel1.add(cmbSemester);
+
+        btnSetSchedule.setText("Set Schedule");
+        btnSetSchedule.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSetScheduleActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnSetSchedule);
+
+        btnRefreshCourses.setText("Refresh");
+        btnRefreshCourses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshCoursesActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnRefreshCourses);
+
+        panelCourseOfferings.add(jPanel1, java.awt.BorderLayout.PAGE_START);
+
+        btnCreateOffer.setText("Create Offer");
+        btnCreateOffer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateOfferActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnCreateOffer);
+
+        btnAssignFaculty.setText("Assign Faculty");
+        btnAssignFaculty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAssignFacultyActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnAssignFaculty);
+
+        btnUpdateCapacity.setText("Update Capacity");
+        btnUpdateCapacity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateCapacityActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnUpdateCapacity);
+
+        btnDeleteOffer.setText("Delete Offer");
+        btnDeleteOffer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteOfferActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnDeleteOffer);
+
+        panelCourseOfferings.add(jPanel2, java.awt.BorderLayout.PAGE_END);
+
+        tblCourseOffers.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Course No", "Course Name", "Faculty", "Capacity", "Enrolled", "Room", "Schedule"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tblCourseOffers);
+
+        panelCourseOfferings.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        registrarTabs.addTab("Course Offerings", panelCourseOfferings);
+
+        panelEnrollment.setLayout(new java.awt.BorderLayout());
+
+        jLabel2.setText("Semester");
+        jPanel3.add(jLabel2);
+
+        cmbEnrollSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel3.add(cmbEnrollSemester);
+
+        jLabel3.setText("Course");
+        jPanel3.add(jLabel3);
+
+        cmbEnrollCourse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel3.add(cmbEnrollCourse);
+
+        panelEnrollment.add(jPanel3, java.awt.BorderLayout.PAGE_START);
+
+        btnEnrollStudent.setText("Enroll Student");
+        btnEnrollStudent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnrollStudentActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnEnrollStudent);
+
+        btnDropStudent.setText("Drop Student");
+        btnDropStudent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDropStudentActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnDropStudent);
+
+        panelEnrollment.add(jPanel4, java.awt.BorderLayout.PAGE_END);
+
+        tblEnrollment.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Student ID", "Student Name", "Course Number", "Course Name"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tblEnrollment);
+
+        panelEnrollment.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+
+        registrarTabs.addTab("Enrollment", panelEnrollment);
+
+        panelFinancials.setLayout(new java.awt.BorderLayout());
+
+        jLabel4.setText("Semester");
+        jPanel5.add(jLabel4);
+
+        cmbFinancialSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel5.add(cmbFinancialSemester);
+
+        btnRefreshFinancial.setText("Refresh");
+        jPanel5.add(btnRefreshFinancial);
+
+        btnGenerateReport.setText("Generate Report");
+        jPanel5.add(btnGenerateReport);
+
+        panelFinancials.add(jPanel5, java.awt.BorderLayout.PAGE_START);
+
+        jPanel6.setLayout(new java.awt.GridLayout(3, 1, 5, 5));
+
+        lblTotalRevenue.setText("Total Revenue: $0.00");
+        jPanel6.add(lblTotalRevenue);
+
+        lblTotalOutstanding.setText("Total Outstanding: $0.00");
+        jPanel6.add(lblTotalOutstanding);
+
+        lblPaymentRate.setText("Payment Rate: 0%");
+        jPanel6.add(lblPaymentRate);
+
+        panelFinancials.add(jPanel6, java.awt.BorderLayout.PAGE_END);
+
+        tblFinancials.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "Student ID", "Student Name", "Total Charged", "Total Paid", "Balance", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane3.setViewportView(tblFinancials);
+
+        panelFinancials.add(jScrollPane3, java.awt.BorderLayout.CENTER);
+
+        registrarTabs.addTab("Financials", panelFinancials);
+
+        panelReports.setLayout(new java.awt.BorderLayout());
+
+        jLabel5.setText("Report Type");
+        jPanel7.add(jLabel5);
+
+        cmbReportType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel7.add(cmbReportType);
+
+        jLabel6.setText("Semester");
+        jPanel7.add(jLabel6);
+
+        cmbReportSemester.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel7.add(cmbReportSemester);
+
+        btnGenerateReportData.setText("Generate");
+        jPanel7.add(btnGenerateReportData);
+
+        panelReports.add(jPanel7, java.awt.BorderLayout.PAGE_START);
+
+        tblReports.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Category", "Value", "Count", "Percentage", "Details"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, true, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane4.setViewportView(tblReports);
+
+        panelReports.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+
+        registrarTabs.addTab("Reports", panelReports);
+
+        panelProfile.setLayout(new java.awt.BorderLayout());
+
+        btnEditProfile.setText("Edit Profile");
+
+        btnSaveProfile.setText("Save Changes");
+
+        btnCancelProfile.setText("Cancel");
+        btnCancelProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelProfileActionPerformed(evt);
+            }
+        });
+
+        btnLogout.setText("Logout");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGap(121, 121, 121)
+                .addComponent(btnEditProfile)
+                .addGap(18, 18, 18)
+                .addComponent(btnSaveProfile)
+                .addGap(18, 18, 18)
+                .addComponent(btnCancelProfile)
+                .addGap(18, 18, 18)
+                .addComponent(btnLogout)
+                .addContainerGap(131, Short.MAX_VALUE))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 480, Short.MAX_VALUE)
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnEditProfile)
+                    .addComponent(btnSaveProfile)
+                    .addComponent(btnCancelProfile)
+                    .addComponent(btnLogout))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
+
+        panelProfile.add(jPanel9, java.awt.BorderLayout.PAGE_END);
+
+        jLabel14.setText("Name");
+
+        jLabel15.setText("Employee ID");
+
+        jLabel16.setText("Email");
+
+        jLabel17.setText("Phone");
+
+        jLabel18.setText("Office");
+
+        jLabel19.setText("Office Hours");
+
+        jLabel20.setText("Department");
+
+        txtProfileDepartment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtProfileDepartmentActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfileName, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfileId, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfileEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfilePhone, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfileOffice, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfileHours, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(txtProfileDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addGap(1, 1, 1)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfileName, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfileId, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfileEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfilePhone, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfileOffice, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfileHours, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProfileDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
+
+        panelProfile.add(jPanel10, java.awt.BorderLayout.CENTER);
+
+        registrarTabs.addTab("Profile", panelProfile);
+
+        add(registrarTabs, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void txtProfileDepartmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProfileDepartmentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProfileDepartmentActionPerformed
+
+    private void btnCancelProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelProfileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCancelProfileActionPerformed
+
+    private void btnCreateOfferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateOfferActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnCreateOfferActionPerformed
+
+    private void btnAssignFacultyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAssignFacultyActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnAssignFacultyActionPerformed
+
+    private void btnUpdateCapacityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCapacityActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnUpdateCapacityActionPerformed
+
+    private void btnDeleteOfferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteOfferActionPerformed
+        // TODO add your handling code here:
+    
+    }//GEN-LAST:event_btnDeleteOfferActionPerformed
+
+    private void btnSetScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSetScheduleActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnSetScheduleActionPerformed
+
+    private void btnEnrollStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnrollStudentActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnEnrollStudentActionPerformed
+
+    private void btnDropStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDropStudentActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnDropStudentActionPerformed
+
+    private void btnRefreshCoursesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshCoursesActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnRefreshCoursesActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAssignFaculty;
+    private javax.swing.JButton btnCancelProfile;
+    private javax.swing.JButton btnCreateOffer;
+    private javax.swing.JButton btnDeleteOffer;
+    private javax.swing.JButton btnDropStudent;
+    private javax.swing.JButton btnEditProfile;
+    private javax.swing.JButton btnEnrollStudent;
+    private javax.swing.JButton btnGenerateReport;
+    private javax.swing.JButton btnGenerateReportData;
+    private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnRefreshCourses;
+    private javax.swing.JButton btnRefreshFinancial;
+    private javax.swing.JButton btnSaveProfile;
+    private javax.swing.JButton btnSetSchedule;
+    private javax.swing.JButton btnUpdateCapacity;
+    private javax.swing.JComboBox<String> cmbEnrollCourse;
+    private javax.swing.JComboBox<String> cmbEnrollSemester;
+    private javax.swing.JComboBox<String> cmbFinancialSemester;
+    private javax.swing.JComboBox<String> cmbReportSemester;
+    private javax.swing.JComboBox<String> cmbReportType;
+    private javax.swing.JComboBox<String> cmbSemester;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JLabel lblPaymentRate;
+    private javax.swing.JLabel lblTotalOutstanding;
+    private javax.swing.JLabel lblTotalRevenue;
+    private javax.swing.JPanel panelCourseOfferings;
+    private javax.swing.JPanel panelEnrollment;
+    private javax.swing.JPanel panelFinancials;
+    private javax.swing.JPanel panelProfile;
+    private javax.swing.JPanel panelReports;
+    private javax.swing.JTabbedPane registrarTabs;
+    private javax.swing.JTable tblCourseOffers;
+    private javax.swing.JTable tblEnrollment;
+    private javax.swing.JTable tblFinancials;
+    private javax.swing.JTable tblReports;
+    private javax.swing.JTextField txtProfileDepartment;
+    private javax.swing.JTextField txtProfileEmail;
+    private javax.swing.JTextField txtProfileHours;
+    private javax.swing.JTextField txtProfileId;
+    private javax.swing.JTextField txtProfileName;
+    private javax.swing.JTextField txtProfileOffice;
+    private javax.swing.JTextField txtProfilePhone;
     // End of variables declaration//GEN-END:variables
+
+    
+    
+    
+
+    
 }
