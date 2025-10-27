@@ -26,6 +26,10 @@ public class CourseSchedule {
         schedule = new ArrayList();
 
     }
+    
+    public ArrayList<CourseOffer> getSchedule() {
+    return schedule;
+}
 
     public CourseOffer newCourseOffer(String  n) {
 
