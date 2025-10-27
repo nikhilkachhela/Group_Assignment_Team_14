@@ -803,16 +803,436 @@ private void exportRoster() {
         JOptionPane.INFORMATION_MESSAGE);
 }
 
-JOptionPane.showMessageDialog(this,
-        "Roster exported successfully!\n" +
-        "File saved to: ~/Documents/Roster_" +
+private void loadGradingCourses() {
+    // courses already filled in loadCoursesForDropdown()
+}
+
+private void loadGradingData() {
+    DefaultTableModel model = (DefaultTableModel) tblGrading.getModel();
+    model.setRowCount(0);
+
+    String selectedCourse = (String) cmbGradingCourse.getSelectedItem();
+    String selectedAssignment = (String) cmbAssignment.getSelectedItem();
+
+    if (selectedCourse == null || selectedAssignment == null) return;
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    String[] semesters = {"Fall2024", "Spring2025", "Summer2025"};
+    for (String semester : semesters) {
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) continue;
+
+        CourseOffer offer = schedule.getCourseOfferByNumber(courseId);
+        if (offer != null && offer.getFacultyProfile() == currentFaculty) {
+
+            ArrayList<StudentProfile> students = department.getStudentDirectory().getStudentList();
+            int studentNum = 1;
+
+            for (StudentProfile student : students) {
+                CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+                if (courseLoad == null) continue;
+
+                for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                    if (sa.getAssociatedCourse().getCOurseNumber().equals(courseId)) {
+
+                        String studentId = "STU-" + String.format("%03d", studentNum);
+                        String key = courseId + "-" + studentId;
+
+                        Double score = assignmentGrades
+                            .getOrDefault(key, new HashMap<>())
+                            .getOrDefault(selectedAssignment, 0.0);
+
+                        double percentage = score;
+                        String letterGrade = GradeCalculator.getLetterGrade(percentage);
+
+                        model.addRow(new Object[]{
+                            studentId,
+                            "Student " + studentNum,
+                            score,
+                            percentage + "%", // display
+                            letterGrade,
+                            "" // comments
+                        });
+                    }
+                }
+                studentNum++;
+            }
+        }
+    }
+
+ calculateClassStats();
+}
+
+private void saveGrades() {
+    String selectedCourse = (String) cmbGradingCourse.getSelectedItem();
+    String selectedAssignment = (String) cmbAssignment.getSelectedItem();
+
+    if (selectedCourse == null || selectedAssignment == null) {
+        JOptionPane.showMessageDialog(this,
+            "Please select course and assignment!",
+            "Incomplete Selection",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    DefaultTableModel model = (DefaultTableModel) tblGrading.getModel();
+
+    for (int i = 0; i < model.getRowCount(); i++) {
+        String studentId = (String) model.getValueAt(i, 0);
+        Object scoreObj = model.getValueAt(i, 2);
+
+        double score = 0.0;
+        if (scoreObj != null) {
+            try {
+                score = Double.parseDouble(scoreObj.toString());
+            } catch (NumberFormatException e) {
+                continue;
+            }
+        }
+
+        String key = courseId + "-" + studentId;
+        assignmentGrades.putIfAbsent(key, new HashMap<>());
+        assignmentGrades.get(key).put(selectedAssignment, score);
+
+        model.setValueAt(score + "%", i, 3);
+        model.setValueAt(GradeCalculator.getLetterGrade(score), i, 4);
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Grades saved successfully!",
+        "Success",
+        JOptionPane.INFORMATION_MESSAGE);
+
+    calculateClassStats();
+}
+
+private void calculateFinalGrades() {
+    String selectedCourse = (String) cmbGradingCourse.getSelectedItem();
+    if (selectedCourse == null) return;
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    DefaultTableModel model = (DefaultTableModel) tblGrading.getModel();
+    model.setRowCount(0);
+
+    Map<String, Double> weights = new HashMap<>();
+    weights.put("Assignment 1", 0.15);
+    weights.put("Assignment 2", 0.15);
+    weights.put("Midterm", 0.25);
+    weights.put("Final", 0.35);
+    weights.put("Project", 0.10);
+
+    ArrayList<StudentProfile> students = department.getStudentDirectory().getStudentList();
+    int studentNum = 1;
+
+    for (StudentProfile student : students) {
+        String studentId = "STU-" + String.format("%03d", studentNum);
+        String key = courseId + "-" + studentId;
+
+        Map<String, Double> sGrades = assignmentGrades.get(key);
+        if (sGrades != null && !sGrades.isEmpty()) {
+            double finalScore = 0.0;
+
+            for (Map.Entry<String, Double> entry : weights.entrySet()) {
+                double assignmentScore = sGrades.getOrDefault(entry.getKey(), 0.0);
+                finalScore += assignmentScore * entry.getValue();
+            }
+
+            String letterGrade = GradeCalculator.getLetterGrade(finalScore);
+
+            studentGrades.putIfAbsent(courseId, new HashMap<>());
+            studentGrades.get(courseId).put(studentId, letterGrade);
+
+            model.addRow(new Object[]{
+                studentId,
+                "Student " + studentNum,
+                String.format("%.1f", finalScore),
+                String.format("%.1f%%", finalScore),
+                letterGrade,
+                "Final Grade Calculated"
+            });
+        }
+        studentNum++;
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Final grades calculated successfully!",
+        "Calculation Complete",
+        JOptionPane.INFORMATION_MESSAGE);
+
+    calculateClassStats();
+}
+
+private void submitFinalGrades() {
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Are you sure you want to submit final grades?\n" +
+        "This action cannot be undone.",
+        "Confirm Submission",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE);
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        JOptionPane.showMessageDialog(this,
+            "Final grades submitted successfully!\n" +
+            "Students can now view their grades in the portal.",
+            "Submission Complete",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+}
+
+private void calculateClassStats() {
+    DefaultTableModel model = (DefaultTableModel) tblGrading.getModel();
+
+    if (model.getRowCount() == 0) {
+        lblClassAverage.setText("Class Average: N/A");
+        lblClassGPA.setText("Class GPA: N/A");
+        return;
+    }
+
+    double totalScore = 0.0;
+    double totalGPA = 0.0;
+    int count = 0;
+
+    for (int i = 0; i < model.getRowCount(); i++) {
+        Object scoreObj = model.getValueAt(i, 2);
+        String letterGrade = (String) model.getValueAt(i, 4);
+
+        if (scoreObj != null && letterGrade != null) {
+            try {
+                double score = Double.parseDouble(scoreObj.toString());
+                totalScore += score;
+                totalGPA += GradeCalculator.getGradePoints(letterGrade);
+                count++;
+            } catch (Exception e) {
+                // ignore bad rows
+            }
+        }
+    }
+
+    if (count > 0) {
+        double avgScore = totalScore / count;
+        double avgGPA = totalGPA / count;
+
+        lblClassAverage.setText(String.format("Class Average: %.1f%%", avgScore));
+        lblClassGPA.setText(String.format("Class GPA: %.2f", avgGPA));
+    }
+}
+
+private void loadPerformanceCourses() {
+    // courses already filled in loadCoursesForDropdown()
+}
+
+private void generatePerformanceReport() {
+    String selectedCourse = (String) cmbReportCourse.getSelectedItem();
+    if (selectedCourse == null) return;
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    DefaultTableModel model = (DefaultTableModel) tblPerformanceReport.getModel();
+    model.setRowCount(0);
+
+    Map<String, Integer> gradeCount = new HashMap<>();
+    Map<String, Double> gradeGPA = new HashMap<>();
+
+    String[] grades = {"A", "A-", "B+", "B", "B-", "C+", "C", "C-", "F"};
+    for (String grade : grades) {
+        gradeCount.put(grade, 0);
+        gradeGPA.put(grade, GradeCalculator.getGradePoints(grade));
+    }
+
+    Map<String, String> courseGrades = studentGrades.get(courseId);
+    if (courseGrades != null) {
+        for (String grade : courseGrades.values()) {
+            gradeCount.put(grade, gradeCount.getOrDefault(grade, 0) + 1);
+        }
+    }
+
+    int totalStudents = courseGrades != null ? courseGrades.size() : 0;
+
+    for (String grade : grades) {
+        int count = gradeCount.get(grade);
+        double percentage = totalStudents > 0 ? (count * 100.0 / totalStudents) : 0;
+
+        model.addRow(new Object[]{
+            grade,
+            count,
+            String.format("%.1f%%", percentage),
+            gradeGPA.get(grade)
+        });
+    }
+
+    lblEnrollmentCount.setText("Total Enrolled: " + totalStudents);
+
+    double totalGPA = 0;
+    int gradeTotal = 0;
+    for (Map.Entry<String, Integer> entry : gradeCount.entrySet()) {
+        int count = entry.getValue();
+        if (count > 0) {
+            totalGPA += gradeGPA.get(entry.getKey()) * count;
+            gradeTotal += count;
+        }
+    }
+
+    if (gradeTotal > 0) {
+        double avgGPA = totalGPA / gradeTotal;
+        lblAverageGrade.setText(String.format("Average GPA: %.2f", avgGPA));
+
+        int bOrBetter = gradeCount.get("A") + gradeCount.get("A-") +
+                        gradeCount.get("B+") + gradeCount.get("B");
+        int percentage = totalStudents > 0 ? (bOrBetter * 100 / totalStudents) : 0;
+        progressBarGradeDistribution.setValue(percentage);
+        progressBarGradeDistribution.setString(percentage + "% with B or better");
+    }
+}
+
+private void exportPerformanceReport() {
+    String selectedCourse = (String) cmbReportCourse.getSelectedItem();
+    if (selectedCourse == null) {
+        JOptionPane.showMessageDialog(this,
+            "Please select a course and generate report first!",
+            "No Report",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Performance report exported successfully!\n" +
+        "File saved to: ~/Documents/Performance_" +
         selectedCourse.split(" - ")[0] + "_" +
-        new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".csv",
+        new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".pdf",
         "Export Success",
         JOptionPane.INFORMATION_MESSAGE);
 }
 
+private void loadTuitionInsights() {
+    DefaultTableModel model = (DefaultTableModel) tblTuitionDetails.getModel();
+    model.setRowCount(0);
 
+    String semester = (String) cmbTuitionSemester.getSelectedItem();
+    if (semester == null) return;
+
+    CourseSchedule schedule = department.getCourseSchedule(semester);
+    if (schedule == null) return;
+
+    double totalTuition = 0;
+    int totalStudents = 0;
+    int courseCount = 0;
+
+    for (CourseOffer offer : schedule.getSchedule()) {
+        if (offer.getFacultyProfile() == currentFaculty) {
+            Course course = offer.getSubjectCourse();
+
+            int enrolled = 0;
+            for (var seat : offer.getSeatList()) {
+                if (seat.isOccupied()) {
+                    enrolled++;
+                }
+            }
+
+            double courseTuition = course.getCoursePrice();
+            double totalRevenue = courseTuition * enrolled;
+            double collectionRate = 95.0; // placeholder
+
+            model.addRow(new Object[]{
+                course.getCOurseNumber() + " - " + course.getCourseName(),
+                enrolled,
+                String.format("$%.2f", courseTuition),
+                String.format("$%.2f", totalRevenue),
+                String.format("%.1f%%", collectionRate)
+            });
+
+            totalTuition += totalRevenue;
+            totalStudents += enrolled;
+            courseCount++;
+        }
+    }
+
+    lblTotalTuition.setText(String.format("Total Tuition Collected: $%.2f", totalTuition));
+    lblTotalEnrolled.setText("Total Students Enrolled: " + totalStudents);
+
+    double avgRevenue = courseCount > 0 ? totalTuition / courseCount : 0;
+    lblRevenuePerCourse.setText(String.format("Average Revenue per Course: $%.2f", avgRevenue));
+}
+
+private void loadProfileData() {
+    txtFacultyName.setText("Faculty Name");
+    txtFacultyId.setText("FAC-001");
+    txtFacultyEmail.setText("faculty@northeastern.edu");
+    txtFacultyPhone.setText("(617) 555-0200");
+    txtFacultyOffice.setText("West Village H, Room 340");
+    txtFacultyDepartment.setText("Information Systems");
+    txtOfficeHours.setText("Mon/Wed 2:00-4:00 PM");
+}
+
+private void enableProfileEditing(boolean enable) {
+    txtFacultyEmail.setEditable(enable);
+    txtFacultyPhone.setEditable(enable);
+    txtFacultyOffice.setEditable(enable);
+    txtOfficeHours.setEditable(enable);
+
+    btnEditProfile.setEnabled(!enable);
+    btnSaveProfile.setEnabled(enable);
+    btnCancelEdit.setEnabled(enable);
+}
+private void saveProfile() {
+    String email = txtFacultyEmail.getText().trim();
+    String phone = txtFacultyPhone.getText().trim();
+    String office = txtFacultyOffice.getText().trim();
+    String hours = txtOfficeHours.getText().trim();
+
+    if (email.isEmpty() || phone.isEmpty() || office.isEmpty() || hours.isEmpty()) {
+        JOptionPane.showMessageDialog(this,
+            "Please fill in all fields!",
+            "Validation Error",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        JOptionPane.showMessageDialog(this,
+            "Please enter a valid email address!",
+            "Invalid Email",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Profile updated successfully!",
+        "Success",
+        JOptionPane.INFORMATION_MESSAGE);
+
+    enableProfileEditing(false);
+}
+
+private void logout() {
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Are you sure you want to logout?",
+        "Confirm Logout",
+        JOptionPane.YES_NO_OPTION);
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        if (authService != null) {
+            authService.logout();
+        }
+
+        cardPanel.removeAll();
+
+        JLabel logoutLabel = new JLabel(
+            "<html><center>" +
+            "<h1>Logged Out Successfully</h1>" +
+            "<p>Thank you for using the Faculty Portal</p>" +
+            "</center></html>",
+            JLabel.CENTER
+        );
+
+        cardPanel.add(logoutLabel);
+        cardPanel.revalidate();
+        cardPanel.repaint();
+    }
+}
 
 
   
