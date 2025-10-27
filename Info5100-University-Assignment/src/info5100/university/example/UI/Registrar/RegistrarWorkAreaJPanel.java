@@ -1337,7 +1337,81 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     private javax.swing.JTextField txtProfileOffice;
     private javax.swing.JTextField txtProfilePhone;
     // End of variables declaration//GEN-END:variables
-
+    
+    private void setupTab1() {
+        
+        
+        // Populate semester dropdown
+        cmbSemester.removeAllItems();
+        cmbSemester.addItem("Fall2024");
+        cmbSemester.addItem("Spring2025");
+        cmbSemester.addItem("Summer2025");
+        cmbSemester.addItem("Fall2025");
+        
+        // Add listener to reload data when semester changes
+        cmbSemester.addActionListener(evt -> loadCourseData());
+        
+        // Load initial data
+        loadCourseData();
+        
+        
+    }
+    
+    private void loadCourseData() {
+        // Get table model
+        DefaultTableModel model = (DefaultTableModel) tblCourseOffers.getModel();
+        model.setRowCount(0); // Clear existing rows
+        
+        // Get selected semester
+        String semester = (String) cmbSemester.getSelectedItem();
+        if (semester == null) return;
+        
+        // Get course schedule for this semester
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) return;
+        
+        // Loop through each course offer and add to table
+        for (CourseOffer offer : schedule.getSchedule()) {
+            Course course = offer.getSubjectCourse();
+            
+            // Calculate enrollment statistics
+            int capacity = offer.getSeatList().size();
+            int enrolled = 0;
+            for (Seat seat : offer.getSeatList()) {
+                if (seat.isOccupied()) {
+                    enrolled++;
+                }
+            }
+            
+            // Check if faculty is assigned
+            String faculty = "Not Assigned";
+            try {
+                if (offer.getFacultyProfile() != null) {
+                    faculty = "Assigned";
+                }
+            } catch (Exception e) {
+                faculty = "Not Assigned";
+            }
+            
+            // Get room and schedule from HashMap
+            String room = courseRooms.getOrDefault(course.getCOurseNumber(), "Not Set");
+            String time = courseSchedules.getOrDefault(course.getCOurseNumber(), "Not Set");
+            
+            // Add row to table
+            model.addRow(new Object[]{
+                course.getCOurseNumber(),
+                course.getCourseName(),
+                faculty,
+                capacity,
+                enrolled,
+                room,
+                time
+            });
+        }
+    
+    }
+    
+    
     
     
     
