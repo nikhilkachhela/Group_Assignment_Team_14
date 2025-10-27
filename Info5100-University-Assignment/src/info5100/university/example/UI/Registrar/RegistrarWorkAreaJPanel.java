@@ -71,7 +71,11 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
         this.facultyDirectory = new FacultyDirectory(dept);
         initComponents();
         
-        
+        setupTab1();
+        setupTab2();
+        setupTab3();
+        setupTab4();
+        setupTab5();
     }
     
     
@@ -544,6 +548,105 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
 
     private void btnCreateOfferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateOfferActionPerformed
         // TODO add your handling code here:
+        // Get course catalog
+        CourseCatalog catalog = department.getCourseCatalog();
+        ArrayList<Course> courses = catalog.getCourseList();
+        
+        // Validation: Check if courses exist
+        if (courses.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No courses available in catalog!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // STEP 1: Let user select a course
+        String[] options = new String[courses.size()];
+        for (int i = 0; i < courses.size(); i++) {
+            Course c = courses.get(i);
+            options[i] = c.getCOurseNumber() + " - " + c.getCourseName();
+        }
+        
+        String selected = (String) JOptionPane.showInputDialog(
+            this,
+            "Select course to offer:",
+            "Step 1: Select Course",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        
+        if (selected == null) return;
+        
+        // Extract course number
+        String courseNumber = selected.split(" - ")[0];
+        
+        // STEP 2: Get enrollment capacity
+        String capacityStr = JOptionPane.showInputDialog(
+            this,
+            "Enter seat capacity (5-50):",
+            "Step 2: Set Capacity",
+            JOptionPane.QUESTION_MESSAGE
+        );
+        
+        if (capacityStr == null) return;
+        
+        // Validate and create offer
+        try {
+            int capacity = Integer.parseInt(capacityStr.trim());
+            
+            // Validation: Check capacity range
+            if (capacity < 5 || capacity > 50) {
+                JOptionPane.showMessageDialog(this,
+                    "Capacity must be between 5 and 50!",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Get or create schedule
+            String semester = (String) cmbSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            
+            if (schedule == null) {
+                schedule = department.newCourseSchedule(semester);
+            }
+            
+            // Create course offer
+            CourseOffer offer = schedule.newCourseOffer(courseNumber);
+            
+            // Validation: Check for duplicates
+            if (offer == null) {
+                JOptionPane.showMessageDialog(this,
+                    "This course already exists in " + semester + "!",
+                    "Duplicate Course",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Generate seats
+            offer.generatSeats(capacity);
+            
+            // Show success message
+            JOptionPane.showMessageDialog(this,
+                "Course offer created successfully!\n\n" +
+                "Course: " + courseNumber + "\n" +
+                "Semester: " + semester + "\n" +
+                "Capacity: " + capacity + " seats",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Refresh table
+            loadCourseData();
+            
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                "Please enter a valid number!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_btnCreateOfferActionPerformed
 
