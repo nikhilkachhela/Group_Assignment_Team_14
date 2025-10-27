@@ -803,15 +803,63 @@ private void exportRoster() {
         JOptionPane.INFORMATION_MESSAGE);
 }
 
-JOptionPane.showMessageDialog(this,
-        "Roster exported successfully!\n" +
-        "File saved to: ~/Documents/Roster_" +
-        selectedCourse.split(" - ")[0] + "_" +
-        new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".csv",
-        "Export Success",
-        JOptionPane.INFORMATION_MESSAGE);
+private void loadGradingCourses() {
+    // courses already filled in loadCoursesForDropdown()
 }
 
+private void loadGradingData() {
+    DefaultTableModel model = (DefaultTableModel) tblGrading.getModel();
+    model.setRowCount(0);
+
+    String selectedCourse = (String) cmbGradingCourse.getSelectedItem();
+    String selectedAssignment = (String) cmbAssignment.getSelectedItem();
+
+    if (selectedCourse == null || selectedAssignment == null) return;
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    String[] semesters = {"Fall2024", "Spring2025", "Summer2025"};
+    for (String semester : semesters) {
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) continue;
+
+        CourseOffer offer = schedule.getCourseOfferByNumber(courseId);
+        if (offer != null && offer.getFacultyProfile() == currentFaculty) {
+
+            ArrayList<StudentProfile> students = department.getStudentDirectory().getStudentList();
+            int studentNum = 1;
+
+            for (StudentProfile student : students) {
+                CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+                if (courseLoad == null) continue;
+
+                for (SeatAssignment sa : courseLoad.getSeatAssignments()) {
+                    if (sa.getAssociatedCourse().getCOurseNumber().equals(courseId)) {
+
+                        String studentId = "STU-" + String.format("%03d", studentNum);
+                        String key = courseId + "-" + studentId;
+
+                        Double score = assignmentGrades
+                            .getOrDefault(key, new HashMap<>())
+                            .getOrDefault(selectedAssignment, 0.0);
+
+                        double percentage = score;
+                        String letterGrade = GradeCalculator.getLetterGrade(percentage);
+
+                        model.addRow(new Object[]{
+                            studentId,
+                            "Student " + studentNum,
+                            score,
+                            percentage + "%", // display
+                            letterGrade,
+                            "" // comments
+                        });
+                    }
+                }
+                studentNum++;
+            }
+        }
+    }
 
 
 
