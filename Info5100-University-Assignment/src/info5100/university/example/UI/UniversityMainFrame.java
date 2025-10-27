@@ -224,41 +224,40 @@ public class UniversityMainFrame extends javax.swing.JFrame {
     
 private void loadWorkArea(User user) {
     pnlContent.removeAll();
-    
+
     JPanel workArea = null;
     String roleName = user.getRole().name();
-    
+
     switch (user.getRole()) {
         case ADMIN:
-            workArea = new AdminWorkAreaPanel(department, userDirectory, 
-                                             financeManager, pnlContent, authService);
+            workArea = new AdminWorkAreaPanel(
+                department,
+                userDirectory,
+                financeManager,
+                pnlContent,
+                authService
+            );
             break;
-            
+
         case STUDENT:
-            // Get the student profile associated with this user
             StudentProfile studentProfile = findStudentProfile(user);
-            
+
             if (studentProfile != null) {
-                // Import the Student UI package
-                // Add this import at the top of the file:
-                // import info5100.university.example.UI.Student.StudentWorkAreaPanel;
-                
                 workArea = new StudentWorkAreaPanel(
-                    department, 
-                    userDirectory, 
-                    financeManager, 
-                    pnlContent, 
+                    department,
+                    userDirectory,
+                    financeManager,
+                    pnlContent,
                     authService,
                     studentProfile
                 );
-                
-                // Show welcome message
-                JOptionPane.showMessageDialog(this, 
+
+                JOptionPane.showMessageDialog(this,
                     "Welcome, Student!\nStudent Portal loaded successfully.",
                     "Login Successful",
                     JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, 
+                JOptionPane.showMessageDialog(this,
                     "Error: Student profile not found!\nPlease contact administrator.",
                     "Profile Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -267,14 +266,53 @@ private void loadWorkArea(User user) {
             break;
             
         case FACULTY:
-            JOptionPane.showMessageDialog(this, "Faculty login successful!");
+            FacultyProfile facultyProfile = findFacultyProfile(user);
+
+            if (facultyProfile != null) {
+                workArea = new FacultyWorkAreaPanel(
+                    department,
+                    userDirectory,
+                    financeManager,
+                    pnlContent,
+                    authService,
+                    facultyProfile
+                );
+
+                JOptionPane.showMessageDialog(this,
+                    "Welcome, Faculty!\nFaculty Portal loaded successfully.",
+                    "Login Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Error: Faculty profile not found!\nPlease contact administrator.",
+                    "Profile Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             break;
-            
+
         case REGISTRAR:
-            workArea = new RegistrarWorkAreaJPanel(department,userDirectory, financeManager, pnlContent, authService);
-            JOptionPane.showMessageDialog(this, "Registrar login successful!");
+            workArea = new RegistrarWorkAreaJPanel(
+                department,
+                userDirectory,
+                financeManager,
+                pnlContent,
+                authService
+            );
+            JOptionPane.showMessageDialog(this,
+                "Registrar login successful!");
             break;
     }
+
+    if (workArea != null) {
+        pnlContent.add(workArea, roleName);
+        pnlContent.revalidate();
+        pnlContent.repaint();
+        ((java.awt.CardLayout) pnlContent.getLayout()).show(pnlContent, roleName);
+
+        System.out.println("Loaded work area for: " + roleName);
+    }
+}
 
     
     // CRITICAL: Add the panel to CardLayout and show it
@@ -328,6 +366,50 @@ private StudentProfile findStudentProfile(User user) {
         return students.get(0);
     }
     
+    return null;
+}
+
+private FacultyProfile findFacultyProfile(User user) {
+    // If the user is already linked to a FacultyProfile, use that
+    if (user.getProfileReference() instanceof FacultyProfile) {
+        return (FacultyProfile) user.getProfileReference();
+    }
+
+    // Otherwise look up from directory
+    FacultyDirectory facultyDir = new FacultyDirectory(department);
+    java.util.ArrayList<FacultyProfile> faculties = facultyDir.getAllFaculty();
+
+    // Try match by Person
+    Person userPerson = user.getPerson();
+    if (userPerson != null) {
+        for (FacultyProfile faculty : faculties) {
+            if (faculty.isMatch(userPerson.getPersonId())) {
+                return faculty;
+            }
+        }
+    }
+
+    String username = user.getUsername();
+    if (username.startsWith("faculty")) {
+        try {
+            int index = 0;
+            if (username.length() > 7) {
+                index = Integer.parseInt(username.substring(7)) - 1;
+            }
+
+            if (index >= 0 && index < faculties.size()) {
+                return faculties.get(index);
+            }
+        } catch (Exception e) {
+            // ignore parse error
+        }
+    }
+
+    // Fallback: first faculty (demo environments often do this)
+    if (!faculties.isEmpty()) {
+        return faculties.get(0);
+    }
+
     return null;
 }
     
