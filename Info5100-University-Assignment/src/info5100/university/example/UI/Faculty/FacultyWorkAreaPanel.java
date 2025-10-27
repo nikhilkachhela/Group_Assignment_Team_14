@@ -1107,6 +1107,55 @@ private void exportPerformanceReport() {
         JOptionPane.INFORMATION_MESSAGE);
 }
 
+private void loadTuitionInsights() {
+    DefaultTableModel model = (DefaultTableModel) tblTuitionDetails.getModel();
+    model.setRowCount(0);
+
+    String semester = (String) cmbTuitionSemester.getSelectedItem();
+    if (semester == null) return;
+
+    CourseSchedule schedule = department.getCourseSchedule(semester);
+    if (schedule == null) return;
+
+    double totalTuition = 0;
+    int totalStudents = 0;
+    int courseCount = 0;
+
+    for (CourseOffer offer : schedule.getSchedule()) {
+        if (offer.getFacultyProfile() == currentFaculty) {
+            Course course = offer.getSubjectCourse();
+
+            int enrolled = 0;
+            for (var seat : offer.getSeatList()) {
+                if (seat.isOccupied()) {
+                    enrolled++;
+                }
+            }
+
+            double courseTuition = course.getCoursePrice();
+            double totalRevenue = courseTuition * enrolled;
+            double collectionRate = 95.0; // placeholder
+
+            model.addRow(new Object[]{
+                course.getCOurseNumber() + " - " + course.getCourseName(),
+                enrolled,
+                String.format("$%.2f", courseTuition),
+                String.format("$%.2f", totalRevenue),
+                String.format("%.1f%%", collectionRate)
+            });
+
+            totalTuition += totalRevenue;
+            totalStudents += enrolled;
+            courseCount++;
+        }
+    }
+
+    lblTotalTuition.setText(String.format("Total Tuition Collected: $%.2f", totalTuition));
+    lblTotalEnrolled.setText("Total Students Enrolled: " + totalStudents);
+
+    double avgRevenue = courseCount > 0 ? totalTuition / courseCount : 0;
+    lblRevenuePerCourse.setText(String.format("Average Revenue per Course: $%.2f", avgRevenue));
+}
 
 
   
