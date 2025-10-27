@@ -29,6 +29,68 @@ public class FacultyWorkAreaPanel extends javax.swing.JPanel {
 
     // top-level tabs
     private JTabbedPane facultyTabs;
+    // Tab 1: My Courses
+private javax.swing.JPanel panelMyCourses;
+private javax.swing.JComboBox<String> cmbCourseSemester;
+private javax.swing.JButton btnRefreshCourses;
+private javax.swing.JButton btnUpdateCourseDetails;
+private javax.swing.JButton btnCloseCourseEnrollment;
+private javax.swing.JButton btnUploadSyllabus;
+private javax.swing.JTable tblMyCourses;
+
+// Tab 2: Student Management
+private javax.swing.JPanel panelStudentManagement;
+private javax.swing.JComboBox<String> cmbStudentCourse;
+private javax.swing.JButton btnViewTranscript;
+private javax.swing.JButton btnViewProgress;
+private javax.swing.JButton btnExportRoster;
+private javax.swing.JTable tblEnrolledStudents;
+
+// Tab 3: Grading
+private javax.swing.JPanel panelGrading;
+private javax.swing.JComboBox<String> cmbGradingCourse;
+private javax.swing.JComboBox<String> cmbAssignment;
+private javax.swing.JButton btnSaveGrades;
+private javax.swing.JButton btnCalculateFinalGrades;
+private javax.swing.JButton btnSubmitFinalGrades;
+private javax.swing.JTable tblGrading;
+private javax.swing.JLabel lblClassAverage;
+private javax.swing.JLabel lblClassGPA;
+
+// Tab 4: Performance Reports
+private javax.swing.JPanel panelPerformance;
+private javax.swing.JComboBox<String> cmbReportSemester;
+private javax.swing.JComboBox<String> cmbReportCourse;
+private javax.swing.JButton btnGenerateReport;
+private javax.swing.JButton btnExportReport;
+private javax.swing.JTable tblPerformanceReport;
+private javax.swing.JProgressBar progressBarGradeDistribution;
+private javax.swing.JLabel lblAverageGrade;
+private javax.swing.JLabel lblEnrollmentCount;
+
+// Tab 5: Tuition Insights
+private javax.swing.JPanel panelTuitionInsights;
+private javax.swing.JComboBox<String> cmbTuitionSemester;
+private javax.swing.JButton btnRefreshTuition;
+private javax.swing.JTable tblTuitionDetails;
+private javax.swing.JLabel lblTotalTuition;
+private javax.swing.JLabel lblTotalEnrolled;
+private javax.swing.JLabel lblRevenuePerCourse;
+
+// Tab 6: Profile
+private javax.swing.JPanel panelProfile;
+private javax.swing.JTextField txtFacultyName;
+private javax.swing.JTextField txtFacultyId;
+private javax.swing.JTextField txtFacultyEmail;
+private javax.swing.JTextField txtFacultyPhone;
+private javax.swing.JTextField txtFacultyOffice;
+private javax.swing.JTextField txtFacultyDepartment;
+private javax.swing.JTextField txtOfficeHours;
+private javax.swing.JButton btnEditProfile;
+private javax.swing.JButton btnSaveProfile;
+private javax.swing.JButton btnCancelEdit;
+private javax.swing.JButton btnLogout;
+
 
     public FacultyWorkAreaPanel(Department dept,
                                 UserDirectory userDir,
