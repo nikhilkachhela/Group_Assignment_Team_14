@@ -47,6 +47,9 @@ public class CourseOffer {
         }
 
     }
+    public ArrayList<Seat> getSeatList() {
+    return seatlist;
+}
 
     public Seat getEmptySeat() {
 

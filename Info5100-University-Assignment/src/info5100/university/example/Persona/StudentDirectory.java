@@ -30,6 +30,9 @@ public class StudentDirectory {
         studentlist.add(sp);
         return sp;
     }
+    public ArrayList<StudentProfile> getStudentList() {
+    return studentlist;
+}
 
     public StudentProfile findStudent(String id) {
 
