@@ -1936,6 +1936,192 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
             }
         }
         
+        private void setupTab5() {
+            // Load profile data
+            loadProfileData();
+
+            // Disable all fields initially
+            setProfileFieldsEditable(false);
+
+            // Setup button actions
+            btnEditProfile.addActionListener(evt -> {
+                setProfileFieldsEditable(true);
+                btnEditProfile.setEnabled(false);
+                btnSaveProfile.setEnabled(true);
+                btnCancelProfile.setEnabled(true);
+            });
+
+            btnSaveProfile.addActionListener(evt -> saveProfileData());
+
+            btnCancelProfile.addActionListener(evt -> {
+                loadProfileData(); // Reload original data
+                setProfileFieldsEditable(false);
+                btnEditProfile.setEnabled(true);
+                btnSaveProfile.setEnabled(false);
+                btnCancelProfile.setEnabled(false);
+            });
+
+            btnLogout.addActionListener(evt -> logout());
+
+            // Initially disable save and cancel buttons
+            btnSaveProfile.setEnabled(false);
+            btnCancelProfile.setEnabled(false);
+}
+        private void loadProfileData() {
+            // Get current user from auth service
+            String username = "registrar";
+            if (authService != null && authService.getCurrentUser() != null) {
+                username = authService.getCurrentUser().getUsername();
+            }
+
+            // Initialize saved values if they don't exist (first time load)
+            if (savedEmail == null) {
+                savedEmail = username + "@northeastern.edu";
+                savedPhone = "(617) 373-2000";
+                savedOffice = "Richards Hall, Room 220";
+                savedHours = "Mon-Fri: 9:00 AM - 5:00 PM";
+                savedDepartment = "Information Systems";
+            }
+
+            // Load data (either original or previously saved)
+            txtProfileName.setText("Registrar Office");
+            txtProfileId.setText("REG-001");
+            txtProfileEmail.setText(savedEmail);
+            txtProfilePhone.setText(savedPhone);
+            txtProfileOffice.setText(savedOffice);
+            txtProfileHours.setText(savedHours);
+            txtProfileDepartment.setText(savedDepartment);
+        }
+        
+        private void setProfileFieldsEditable(boolean editable) {
+            // Name and ID are never editable
+            txtProfileName.setEditable(false);
+            txtProfileId.setEditable(false);
+
+            // These fields can be edited
+            txtProfileEmail.setEditable(editable);
+            txtProfilePhone.setEditable(editable);
+            txtProfileOffice.setEditable(editable);
+            txtProfileHours.setEditable(editable);
+            txtProfileDepartment.setEditable(editable);
+
+            // Visual feedback
+            if (editable) {
+                txtProfileEmail.setBackground(java.awt.Color.WHITE);
+                txtProfilePhone.setBackground(java.awt.Color.WHITE);
+                txtProfileOffice.setBackground(java.awt.Color.WHITE);
+                txtProfileHours.setBackground(java.awt.Color.WHITE);
+                txtProfileDepartment.setBackground(java.awt.Color.WHITE);
+            } else {
+                java.awt.Color lightGray = new java.awt.Color(240, 240, 240);
+                txtProfileEmail.setBackground(lightGray);
+                txtProfilePhone.setBackground(lightGray);
+                txtProfileOffice.setBackground(lightGray);
+                txtProfileHours.setBackground(lightGray);
+                txtProfileDepartment.setBackground(lightGray);
+            }
+}
+    
+        private void saveProfileData() {
+            // Get trimmed values
+            String email = txtProfileEmail.getText().trim();
+            String phone = txtProfilePhone.getText().trim();
+            String office = txtProfileOffice.getText().trim();
+            String hours = txtProfileHours.getText().trim();
+            String dept = txtProfileDepartment.getText().trim();
+
+            // VALIDATION 1: Check for empty fields
+            if (email.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Email cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileEmail.requestFocus();
+                return;
+            }
+
+            if (phone.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Phone number cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfilePhone.requestFocus();
+                return;
+            }
+
+            if (office.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Office location cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileOffice.requestFocus();
+                return;
+            }
+
+            if (hours.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Office hours cannot be empty!",
+                    "Validation Error",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileHours.requestFocus();
+                return;
+            }
+
+            // VALIDATION 2: Email format validation
+            if (!isValidEmail(email)) {
+                JOptionPane.showMessageDialog(this,
+                    "Invalid email format!\n\n" +
+                    "Please enter a valid email address.\n" +
+                    "Example: registrar@northeastern.edu",
+                    "Invalid Email",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfileEmail.requestFocus();
+                txtProfileEmail.selectAll();
+                return;
+            }
+
+            // VALIDATION 3: Phone number validation
+            if (!isValidPhone(phone)) {
+                JOptionPane.showMessageDialog(this,
+                    "Invalid phone number format!\n\n" +
+                    "Accepted formats:\n" +
+                    "• (617) 373-2000\n" +
+                    "• 617-373-2000\n" +
+                    "• 6173732000\n" +
+                    "• +1 617-373-2000",
+                    "Invalid Phone Number",
+                    JOptionPane.ERROR_MESSAGE);
+                txtProfilePhone.requestFocus();
+                txtProfilePhone.selectAll();
+                return;
+            }
+
+            // SAVE THE DATA (store in class variables so it persists)
+            savedEmail = email;
+            savedPhone = phone;
+            savedOffice = office;
+            savedHours = hours;
+            savedDepartment = dept;
+
+            // Show success message
+            JOptionPane.showMessageDialog(this,
+                "Profile updated successfully!\n\n" +
+                "Email: " + email + "\n" +
+                "Phone: " + phone + "\n" +
+                "Office: " + office + "\n" +
+                "Hours: " + hours + "\n" +
+                "Department: " + dept,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+
+            // Disable editing
+            setProfileFieldsEditable(false);
+            btnEditProfile.setEnabled(true);
+            btnSaveProfile.setEnabled(false);
+            btnCancelProfile.setEnabled(false);
+        }
+        
+        
         
     
     
