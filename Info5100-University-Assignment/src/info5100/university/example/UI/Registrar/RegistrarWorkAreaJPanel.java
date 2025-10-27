@@ -1411,6 +1411,224 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     
     }
     
+        private void setupTab2() {
+            // Populate semester dropdown
+            cmbEnrollSemester.removeAllItems();
+            cmbEnrollSemester.addItem("Fall2024");
+            cmbEnrollSemester.addItem("Spring2025");
+            cmbEnrollSemester.addItem("Summer2025");
+
+            // When semester changes, reload course filter options
+            cmbEnrollSemester.addActionListener(evt -> loadEnrollmentCourseFilter());
+
+            // When course filter changes, reload table
+            cmbEnrollCourse.addActionListener(evt -> loadEnrollmentData());
+
+            // Load initial data
+            loadEnrollmentCourseFilter();
+        }
+    
+        private void loadEnrollmentCourseFilter() {
+            // Clear course dropdown
+            cmbEnrollCourse.removeAllItems();
+            cmbEnrollCourse.addItem("All Courses");
+
+            // Get selected semester
+            String semester = (String) cmbEnrollSemester.getSelectedItem();
+            if (semester == null) return;
+
+            // Get courses for this semester
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            if (schedule == null) return;
+
+            // Add each course to dropdown
+            for (CourseOffer offer : schedule.getSchedule()) {
+                Course course = offer.getSubjectCourse();
+                cmbEnrollCourse.addItem(course.getCOurseNumber());
+            }
+
+            // Load enrollment data
+            loadEnrollmentData();
+
+        }
+    
+        private void loadEnrollmentData() {
+        // Get table model
+        DefaultTableModel model = (DefaultTableModel) tblEnrollment.getModel();
+        model.setRowCount(0); // Clear table
+
+        // Get filter values
+        String semester = (String) cmbEnrollSemester.getSelectedItem();
+        String courseFilter = (String) cmbEnrollCourse.getSelectedItem();
+
+        // Null checks
+        if (semester == null) return;
+
+        // Get course schedule
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        if (schedule == null) return;
+
+        // Get all students
+        ArrayList<StudentProfile> allStudents = department.getStudentDirectory().getStudentList();
+
+        // Loop through all students
+        for (int i = 0; i < allStudents.size(); i++) {
+            StudentProfile student = allStudents.get(i);
+
+            // Get student's course load for this semester
+            CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+            if (courseLoad == null) continue;
+
+            // Check each seat assignment
+            ArrayList<SeatAssignment> assignments = courseLoad.getSeatAssignments();
+
+            for (SeatAssignment sa : assignments) {
+                Course course = sa.getAssociatedCourse();
+
+                // Apply course filter (WITH NULL CHECK)
+                if (courseFilter != null && 
+                    !courseFilter.equals("All Courses") && 
+                    !course.getCOurseNumber().equals(courseFilter)) {
+                    continue; // Skip this course
+                }
+
+                // Generate student display info
+                String studentId = "STU-" + String.format("%03d", i + 1);
+                String studentName = "Student " + (i + 1);
+
+                // Add real enrollment record to table
+                model.addRow(new Object[]{
+                    studentId,
+                    studentName,
+                    course.getCOurseNumber(),
+                    course.getCourseName()
+                });
+
+                // CRITICAL: Track this enrollment for drop functionality
+                CourseOffer offer = sa.getCourseOffer();
+                Seat seat = sa.getSeat();
+
+                EnrollmentInfo info = new EnrollmentInfo(
+                    student,
+                    offer,
+                    seat,
+                    semester
+                );
+                enrollmentTracker.put(studentId, info);
+            }
+        }
+    }
+        private void setupTab3() {
+            // Populate semester dropdown
+            cmbFinancialSemester.removeAllItems();
+            cmbFinancialSemester.addItem("Fall2024");
+            cmbFinancialSemester.addItem("Spring2025");
+            cmbFinancialSemester.addItem("Summer2025");
+            cmbFinancialSemester.addItem("Fall2025");
+
+            // Add action listeners
+            cmbFinancialSemester.addActionListener(evt -> loadFinancialData());
+
+            btnRefreshFinancial.addActionListener(evt -> {
+                loadFinancialData();
+                JOptionPane.showMessageDialog(this,
+                    "Financial data refreshed!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            btnGenerateReport.addActionListener(evt -> generateFinancialReport());
+
+            // Load initial data
+            loadFinancialData();
+        }
+        
+        private void loadFinancialData() {
+    // Get table model
+    DefaultTableModel model = (DefaultTableModel) tblFinancials.getModel();
+    model.setRowCount(0); // Clear table
+    
+    // Get selected semester
+    String semester = (String) cmbFinancialSemester.getSelectedItem();
+    if (semester == null) return;
+    
+    // Initialize totals
+    double totalRevenue = 0.0;
+    double totalOutstanding = 0.0;
+    int totalStudents = 0;
+    int paidStudents = 0;
+    
+    // Get all students
+    ArrayList<StudentProfile> allStudents = department.getStudentDirectory().getStudentList();
+    
+    // Loop through each student
+    for (int i = 0; i < allStudents.size(); i++) {
+        StudentProfile student = allStudents.get(i);
+        
+        // Get student's course load for this semester
+        CourseLoad courseLoad = student.getCourseLoadBySemester(semester);
+        if (courseLoad == null) continue; // Skip if not enrolled this semester
+        
+        // Calculate charges for this semester
+        double semesterCharges = 0.0;
+        ArrayList<SeatAssignment> assignments = courseLoad.getSeatAssignments();
+        
+        for (SeatAssignment sa : assignments) {
+            Course course = sa.getAssociatedCourse();
+            semesterCharges += course.getCoursePrice();
+        }
+        
+        // Skip if no charges
+        if (semesterCharges == 0) continue;
+        
+        totalStudents++;
+        
+        // Get payment info from FinanceManager
+        TuitionAccount account = financeManager.getStudentAccount(student);
+        double totalPaid = account.getTotalPaid();
+        double balance = account.getBalance();
+        
+        // Determine status
+        String status;
+        if (balance <= 0) {
+            status = "Paid";
+            paidStudents++;
+        } else if (totalPaid > 0) {
+            status = "Partial";
+        } else {
+            status = "Unpaid";
+        }
+        
+        // Update totals
+        totalRevenue += totalPaid;
+        totalOutstanding += (balance > 0 ? balance : 0);
+        
+        // Generate display info
+        String studentId = "STU-" + String.format("%03d", i + 1);
+        String studentName = "Student " + (i + 1);
+        
+        // Add row to table
+        model.addRow(new Object[]{
+            studentId,
+            studentName,
+            String.format("$%.2f", semesterCharges),
+            String.format("$%.2f", totalPaid),
+            String.format("$%.2f", balance),
+            status
+        });
+    }
+    
+    // Update summary labels
+    lblTotalRevenue.setText(String.format("Total Revenue: $%.2f", totalRevenue));
+    lblTotalOutstanding.setText(String.format("Total Outstanding: $%.2f", totalOutstanding));
+    
+    // Calculate payment rate
+    double paymentRate = totalStudents > 0 ? (paidStudents * 100.0 / totalStudents) : 0.0;
+    lblPaymentRate.setText(String.format("Payment Rate: %.1f%%", paymentRate));
+}
+        
+        
+    
     
     
     
