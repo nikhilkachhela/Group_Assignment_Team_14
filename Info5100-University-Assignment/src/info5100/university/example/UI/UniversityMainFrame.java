@@ -290,12 +290,29 @@ private void loadWorkArea(User user) {
                 return;
             }
             break;
-            
+
         case REGISTRAR:
-            workArea = new RegistrarWorkAreaJPanel(department,userDirectory, financeManager, pnlContent, authService);
-            JOptionPane.showMessageDialog(this, "Registrar login successful!");
+            workArea = new RegistrarWorkAreaJPanel(
+                department,
+                userDirectory,
+                financeManager,
+                pnlContent,
+                authService
+            );
+            JOptionPane.showMessageDialog(this,
+                "Registrar login successful!");
             break;
     }
+
+    if (workArea != null) {
+        pnlContent.add(workArea, roleName);
+        pnlContent.revalidate();
+        pnlContent.repaint();
+        ((java.awt.CardLayout) pnlContent.getLayout()).show(pnlContent, roleName);
+
+        System.out.println("Loaded work area for: " + roleName);
+    }
+}
 
     
     // CRITICAL: Add the panel to CardLayout and show it
