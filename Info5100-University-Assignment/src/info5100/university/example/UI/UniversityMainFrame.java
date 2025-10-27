@@ -224,41 +224,40 @@ public class UniversityMainFrame extends javax.swing.JFrame {
     
 private void loadWorkArea(User user) {
     pnlContent.removeAll();
-    
+
     JPanel workArea = null;
     String roleName = user.getRole().name();
-    
+
     switch (user.getRole()) {
         case ADMIN:
-            workArea = new AdminWorkAreaPanel(department, userDirectory, 
-                                             financeManager, pnlContent, authService);
+            workArea = new AdminWorkAreaPanel(
+                department,
+                userDirectory,
+                financeManager,
+                pnlContent,
+                authService
+            );
             break;
-            
+
         case STUDENT:
-            // Get the student profile associated with this user
             StudentProfile studentProfile = findStudentProfile(user);
-            
+
             if (studentProfile != null) {
-                // Import the Student UI package
-                // Add this import at the top of the file:
-                // import info5100.university.example.UI.Student.StudentWorkAreaPanel;
-                
                 workArea = new StudentWorkAreaPanel(
-                    department, 
-                    userDirectory, 
-                    financeManager, 
-                    pnlContent, 
+                    department,
+                    userDirectory,
+                    financeManager,
+                    pnlContent,
                     authService,
                     studentProfile
                 );
-                
-                // Show welcome message
-                JOptionPane.showMessageDialog(this, 
+
+                JOptionPane.showMessageDialog(this,
                     "Welcome, Student!\nStudent Portal loaded successfully.",
                     "Login Successful",
                     JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, 
+                JOptionPane.showMessageDialog(this,
                     "Error: Student profile not found!\nPlease contact administrator.",
                     "Profile Error",
                     JOptionPane.ERROR_MESSAGE);
