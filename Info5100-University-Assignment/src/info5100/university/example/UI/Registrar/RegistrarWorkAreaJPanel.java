@@ -2122,7 +2122,102 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
         }
         
         
-        
+        private boolean isValidEmail(String email) {
+            if (email == null || email.isEmpty()) {
+                return false;
+            }
+
+            // Basic email validation regex
+            // Matches: username@domain.extension
+            String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
+            return email.matches(emailRegex);
+}
+
+        /**
+         * Validate phone number format
+         * Accepts multiple formats:
+         * - (617) 373-2000
+         * - 617-373-2000
+         * - 6173732000
+         * - +1 617-373-2000
+         * - +1-617-373-2000
+         */
+        private boolean isValidPhone(String phone) {
+            if (phone == null || phone.isEmpty()) {
+                return false;
+            }
+
+            // Remove all spaces, dashes, parentheses, and plus signs for counting
+            String digitsOnly = phone.replaceAll("[\\s\\-()\\+]", "");
+
+            // Must have 10 or 11 digits (11 if includes country code)
+            if (digitsOnly.length() < 10 || digitsOnly.length() > 11) {
+                return false;
+            }
+
+            // Must contain only digits after removing formatting
+            if (!digitsOnly.matches("\\d+")) {
+                return false;
+            }
+
+            // Valid phone number patterns
+            String[] patterns = {
+                "^\\(\\d{3}\\)\\s?\\d{3}-\\d{4}$",           // (617) 373-2000 or (617)373-2000
+                "^\\d{3}-\\d{3}-\\d{4}$",                     // 617-373-2000
+                "^\\d{10}$",                                  // 6173732000
+                "^\\+1\\s?\\d{3}-\\d{3}-\\d{4}$",            // +1 617-373-2000
+                "^\\+1-\\d{3}-\\d{3}-\\d{4}$",               // +1-617-373-2000
+                "^\\+1\\(\\d{3}\\)\\s?\\d{3}-\\d{4}$"        // +1(617) 373-2000
+            };
+
+            for (String pattern : patterns) {
+                if (phone.matches(pattern)) {
+                    return true;
+                }
+            }
+
+            return false;
+}
+    
+        private void logout() {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to logout?",
+                "Confirm Logout",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                // Perform logout
+                if (authService != null) {
+                    authService.logout();
+                }
+
+                // Clear the card panel and show logout message
+                cardPanel.removeAll();
+
+                javax.swing.JLabel logoutLabel = new javax.swing.JLabel(
+                    "<html><center>" +
+                    "<h1>Logged Out Successfully</h1>" +
+                    "<p>Thank you for using the Northeastern MSIS Portal</p>" +
+                    "<p>Please close this window or restart the application to login again.</p>" +
+                    "</center></html>",
+                    javax.swing.JLabel.CENTER
+                );
+                logoutLabel.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+
+                cardPanel.add(logoutLabel);
+                cardPanel.revalidate();
+                cardPanel.repaint();
+
+                // Show confirmation
+                JOptionPane.showMessageDialog(this,
+                    "You have been logged out successfully.",
+                    "Logged Out",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+}
+
     
     
     
