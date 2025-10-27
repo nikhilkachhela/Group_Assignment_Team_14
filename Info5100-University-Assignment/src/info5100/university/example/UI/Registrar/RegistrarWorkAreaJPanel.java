@@ -652,16 +652,234 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
 
     private void btnAssignFacultyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAssignFacultyActionPerformed
         // TODO add your handling code here:
+        int row = tblCourseOffers.getSelectedRow();
+        
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course from the table first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get course information
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        String courseName = (String) tblCourseOffers.getValueAt(row, 1);
+        
+        // Get course offer
+        String semester = (String) cmbSemester.getSelectedItem();
+        CourseSchedule schedule = department.getCourseSchedule(semester);
+        CourseOffer offer = schedule.getCourseOfferByNumber(courseNumber);
+        
+        // Get faculty list
+        ArrayList<FacultyProfile> faculties = facultyDirectory.getAllFaculty();
+        
+        // Validation: Check if faculty available
+        if (faculties == null || faculties.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "No faculty members available!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Create faculty options
+        String[] options = new String[faculties.size()];
+        for (int i = 0; i < faculties.size(); i++) {
+            options[i] = "Faculty " + (i + 1);
+        }
+        
+        // Let user select faculty
+        String selected = (String) JOptionPane.showInputDialog(
+            this,
+            "Assign faculty to: " + courseNumber + " - " + courseName + "\n\nSelect faculty member:",
+            "Assign Faculty",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        
+        if (selected == null) return;
+        
+        // Get selected faculty and assign
+        int index = Integer.parseInt(selected.split(" ")[1]) - 1;
+        FacultyProfile faculty = faculties.get(index);
+        offer.AssignAsTeacher(faculty);
+        
+        // Show success
+        JOptionPane.showMessageDialog(this,
+            "Faculty assigned successfully!\n\n" +
+            "Course: " + courseNumber,
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        // Refresh table
+        loadCourseData();
         
     }//GEN-LAST:event_btnAssignFacultyActionPerformed
 
     private void btnUpdateCapacityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCapacityActionPerformed
         // TODO add your handling code here:
+        // Validation: Check if row selected
+        int row = tblCourseOffers.getSelectedRow();
+        
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Get current data
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        int currentCapacity = (int) tblCourseOffers.getValueAt(row, 3);
+        int enrolled = (int) tblCourseOffers.getValueAt(row, 4);
+        
+        // Ask for new capacity
+        String input = JOptionPane.showInputDialog(
+            this,
+            "Course: " + courseNumber + "\n\n" +
+            "Current Capacity: " + currentCapacity + " seats\n" +
+            "Enrolled Students: " + enrolled + " students\n\n" +
+            "Enter new capacity (minimum " + enrolled + "):",
+            "Update Capacity",
+            JOptionPane.QUESTION_MESSAGE
+        );
+        
+        if (input == null) return;
+        
+        try {
+            int newCapacity = Integer.parseInt(input.trim());
+            
+            // Validation: Check minimum
+            if (newCapacity < enrolled) {
+                JOptionPane.showMessageDialog(this,
+                    "New capacity cannot be less than enrolled students!",
+                    "Invalid Capacity",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Validation: Check range
+            if (newCapacity < 5 || newCapacity > 100) {
+                JOptionPane.showMessageDialog(this,
+                    "Capacity must be between 5 and 100!",
+                    "Invalid Range",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Update capacity
+            String semester = (String) cmbSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+            CourseOffer offer = schedule.getCourseOfferByNumber(courseNumber);
+            
+            // Add seats if needed
+            int seatsToAdd = newCapacity - currentCapacity;
+            if (seatsToAdd > 0) {
+                offer.generatSeats(seatsToAdd);
+            }
+            
+            // Show success
+            JOptionPane.showMessageDialog(this,
+                "Capacity updated successfully!\n\n" +
+                "Course: " + courseNumber + "\n" +
+                "Old: " + currentCapacity + " → New: " + newCapacity,
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            
+            // Refresh table
+            loadCourseData();
+            
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                "Please enter a valid number!",
+                "Invalid Input",
+                JOptionPane.ERROR_MESSAGE);
+        }
         
     }//GEN-LAST:event_btnUpdateCapacityActionPerformed
 
     private void btnDeleteOfferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteOfferActionPerformed
         // TODO add your handling code here:
+        // Validation: Check if user selected a row from table
+        int row = tblCourseOffers.getSelectedRow();
+
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Please select a course from the table first!",
+                "No Selection",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Get course information from selected row
+        String courseNumber = (String) tblCourseOffers.getValueAt(row, 0);
+        String courseName = (String) tblCourseOffers.getValueAt(row, 1);
+        int enrolled = (int) tblCourseOffers.getValueAt(row, 4);
+
+        // Validation: Cannot delete if students are enrolled
+        // Must drop all students first to maintain data integrity
+        if (enrolled > 0) {
+            JOptionPane.showMessageDialog(this,
+                "Cannot delete this course!\n\n" +
+                "Course: " + courseNumber + "\n" +
+                "Enrolled Students: " + enrolled + "\n\n" +
+                "Please drop all students before deleting the course.",
+                "Cannot Delete",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Ask user to confirm deletion
+        // This prevents accidental deletions
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete this course?\n\n" +
+            "Course: " + courseNumber + "\n" +
+            "Name: " + courseName + "\n\n" +
+            "This action cannot be undone.",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        // If user clicked "Yes", proceed with deletion
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Get current semester and course schedule
+            String semester = (String) cmbSemester.getSelectedItem();
+            CourseSchedule schedule = department.getCourseSchedule(semester);
+
+            // Attempt to delete the course offer from backend
+            boolean deleted = schedule.deleteCourseOffer(courseNumber);
+
+            if (deleted) {
+                // Deletion successful - also remove room and schedule data
+                courseRooms.remove(courseNumber);
+                courseSchedules.remove(courseNumber);
+
+                // Show success message
+                JOptionPane.showMessageDialog(this,
+                    "Course deleted successfully!\n\n" +
+                    "Course: " + courseNumber + "\n" +
+                    "Semester: " + semester,
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+                // Refresh table to reflect deletion
+                loadCourseData();
+
+            } else {
+                // Deletion failed - course not found
+                JOptionPane.showMessageDialog(this,
+                    "Failed to delete course!\n\n" +
+                    "Course may have already been removed.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+                }
+            }
     
     }//GEN-LAST:event_btnDeleteOfferActionPerformed
 
