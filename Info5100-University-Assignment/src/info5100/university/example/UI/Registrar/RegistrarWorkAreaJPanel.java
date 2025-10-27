@@ -1627,6 +1627,50 @@ public class RegistrarWorkAreaJPanel extends javax.swing.JPanel {
     lblPaymentRate.setText(String.format("Payment Rate: %.1f%%", paymentRate));
 }
         
+        private void generateFinancialReport() {
+            String semester = (String) cmbFinancialSemester.getSelectedItem();
+            if (semester == null) return;
+
+            // Generate report using FinanceManager
+            FinancialReport report = financeManager.generateSemesterReport(semester, department.toString());
+
+            // Build report message
+            StringBuilder reportText = new StringBuilder();
+            reportText.append("FINANCIAL REPORT - ").append(semester).append("\n");
+            reportText.append("=" .repeat(50)).append("\n\n");
+
+            reportText.append("ENROLLMENT STATISTICS:\n");
+            reportText.append(String.format("  Total Students Enrolled: %d\n", report.getTotalStudents()));
+            reportText.append(String.format("  Students with Paid Tuition: %d\n", report.getPaidStudents()));
+            reportText.append(String.format("  Payment Rate: %.1f%%\n\n", report.getPaymentRate()));
+
+            reportText.append("FINANCIAL SUMMARY:\n");
+            reportText.append(String.format("  Total Revenue Collected: $%.2f\n", report.getTotalRevenue()));
+            reportText.append(String.format("  Outstanding Balance: $%.2f\n", report.getTotalOutstanding()));
+            reportText.append(String.format("  Collection Rate: %.1f%%\n\n", report.getCollectionRate()));
+
+            reportText.append("DEPARTMENT BREAKDOWN:\n");
+            for (Map.Entry<String, Double> entry : report.getDepartmentRevenue().entrySet()) {
+                reportText.append(String.format("  %s: $%.2f\n", entry.getKey(), entry.getValue()));
+            }
+
+            reportText.append("\n").append("=".repeat(50)).append("\n");
+            reportText.append("Report Generated: ").append(java.time.LocalDateTime.now()).append("\n");
+
+            // Show report in dialog
+            javax.swing.JTextArea textArea = new javax.swing.JTextArea(reportText.toString());
+            textArea.setEditable(false);
+            textArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
+
+            javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(textArea);
+            scrollPane.setPreferredSize(new java.awt.Dimension(600, 400));
+
+            JOptionPane.showMessageDialog(this,
+                scrollPane,
+                "Financial Report - " + semester,
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+        
         
     
     
