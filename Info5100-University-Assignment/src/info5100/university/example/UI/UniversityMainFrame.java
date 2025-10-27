@@ -368,6 +368,26 @@ private StudentProfile findStudentProfile(User user) {
     
     return null;
 }
+
+private FacultyProfile findFacultyProfile(User user) {
+    // If the user is already linked to a FacultyProfile, use that
+    if (user.getProfileReference() instanceof FacultyProfile) {
+        return (FacultyProfile) user.getProfileReference();
+    }
+
+    // Otherwise look up from directory
+    FacultyDirectory facultyDir = new FacultyDirectory(department);
+    java.util.ArrayList<FacultyProfile> faculties = facultyDir.getAllFaculty();
+
+    // Try match by Person
+    Person userPerson = user.getPerson();
+    if (userPerson != null) {
+        for (FacultyProfile faculty : faculties) {
+            if (faculty.isMatch(userPerson.getPersonId())) {
+                return faculty;
+            }
+        }
+    }
     
     /**
      * @param args the command line arguments
