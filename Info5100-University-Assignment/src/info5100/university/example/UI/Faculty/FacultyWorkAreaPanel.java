@@ -1021,5 +1021,48 @@ private void calculateClassStats() {
     }
 }
 
+private void loadPerformanceCourses() {
+    // courses already filled in loadCoursesForDropdown()
+}
+
+private void generatePerformanceReport() {
+    String selectedCourse = (String) cmbReportCourse.getSelectedItem();
+    if (selectedCourse == null) return;
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    DefaultTableModel model = (DefaultTableModel) tblPerformanceReport.getModel();
+    model.setRowCount(0);
+
+    Map<String, Integer> gradeCount = new HashMap<>();
+    Map<String, Double> gradeGPA = new HashMap<>();
+
+    String[] grades = {"A", "A-", "B+", "B", "B-", "C+", "C", "C-", "F"};
+    for (String grade : grades) {
+        gradeCount.put(grade, 0);
+        gradeGPA.put(grade, GradeCalculator.getGradePoints(grade));
+    }
+
+    Map<String, String> courseGrades = studentGrades.get(courseId);
+    if (courseGrades != null) {
+        for (String grade : courseGrades.values()) {
+            gradeCount.put(grade, gradeCount.getOrDefault(grade, 0) + 1);
+        }
+    }
+
+    int totalStudents = courseGrades != null ? courseGrades.size() : 0;
+
+    for (String grade : grades) {
+        int count = gradeCount.get(grade);
+        double percentage = totalStudents > 0 ? (count * 100.0 / totalStudents) : 0;
+
+        model.addRow(new Object[]{
+            grade,
+            count,
+            String.format("%.1f%%", percentage),
+            gradeGPA.get(grade)
+        });
+    }
+
 
   
