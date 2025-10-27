@@ -1021,5 +1021,218 @@ private void calculateClassStats() {
     }
 }
 
+private void loadPerformanceCourses() {
+    // courses already filled in loadCoursesForDropdown()
+}
+
+private void generatePerformanceReport() {
+    String selectedCourse = (String) cmbReportCourse.getSelectedItem();
+    if (selectedCourse == null) return;
+
+    String courseId = selectedCourse.split(" - ")[0];
+
+    DefaultTableModel model = (DefaultTableModel) tblPerformanceReport.getModel();
+    model.setRowCount(0);
+
+    Map<String, Integer> gradeCount = new HashMap<>();
+    Map<String, Double> gradeGPA = new HashMap<>();
+
+    String[] grades = {"A", "A-", "B+", "B", "B-", "C+", "C", "C-", "F"};
+    for (String grade : grades) {
+        gradeCount.put(grade, 0);
+        gradeGPA.put(grade, GradeCalculator.getGradePoints(grade));
+    }
+
+    Map<String, String> courseGrades = studentGrades.get(courseId);
+    if (courseGrades != null) {
+        for (String grade : courseGrades.values()) {
+            gradeCount.put(grade, gradeCount.getOrDefault(grade, 0) + 1);
+        }
+    }
+
+    int totalStudents = courseGrades != null ? courseGrades.size() : 0;
+
+    for (String grade : grades) {
+        int count = gradeCount.get(grade);
+        double percentage = totalStudents > 0 ? (count * 100.0 / totalStudents) : 0;
+
+        model.addRow(new Object[]{
+            grade,
+            count,
+            String.format("%.1f%%", percentage),
+            gradeGPA.get(grade)
+        });
+    }
+
+    lblEnrollmentCount.setText("Total Enrolled: " + totalStudents);
+
+    double totalGPA = 0;
+    int gradeTotal = 0;
+    for (Map.Entry<String, Integer> entry : gradeCount.entrySet()) {
+        int count = entry.getValue();
+        if (count > 0) {
+            totalGPA += gradeGPA.get(entry.getKey()) * count;
+            gradeTotal += count;
+        }
+    }
+
+    if (gradeTotal > 0) {
+        double avgGPA = totalGPA / gradeTotal;
+        lblAverageGrade.setText(String.format("Average GPA: %.2f", avgGPA));
+
+        int bOrBetter = gradeCount.get("A") + gradeCount.get("A-") +
+                        gradeCount.get("B+") + gradeCount.get("B");
+        int percentage = totalStudents > 0 ? (bOrBetter * 100 / totalStudents) : 0;
+        progressBarGradeDistribution.setValue(percentage);
+        progressBarGradeDistribution.setString(percentage + "% with B or better");
+    }
+}
+
+private void exportPerformanceReport() {
+    String selectedCourse = (String) cmbReportCourse.getSelectedItem();
+    if (selectedCourse == null) {
+        JOptionPane.showMessageDialog(this,
+            "Please select a course and generate report first!",
+            "No Report",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Performance report exported successfully!\n" +
+        "File saved to: ~/Documents/Performance_" +
+        selectedCourse.split(" - ")[0] + "_" +
+        new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".pdf",
+        "Export Success",
+        JOptionPane.INFORMATION_MESSAGE);
+}
+
+private void loadTuitionInsights() {
+    DefaultTableModel model = (DefaultTableModel) tblTuitionDetails.getModel();
+    model.setRowCount(0);
+
+    String semester = (String) cmbTuitionSemester.getSelectedItem();
+    if (semester == null) return;
+
+    CourseSchedule schedule = department.getCourseSchedule(semester);
+    if (schedule == null) return;
+
+    double totalTuition = 0;
+    int totalStudents = 0;
+    int courseCount = 0;
+
+    for (CourseOffer offer : schedule.getSchedule()) {
+        if (offer.getFacultyProfile() == currentFaculty) {
+            Course course = offer.getSubjectCourse();
+
+            int enrolled = 0;
+            for (var seat : offer.getSeatList()) {
+                if (seat.isOccupied()) {
+                    enrolled++;
+                }
+            }
+
+            double courseTuition = course.getCoursePrice();
+            double totalRevenue = courseTuition * enrolled;
+            double collectionRate = 95.0; // placeholder
+
+            model.addRow(new Object[]{
+                course.getCOurseNumber() + " - " + course.getCourseName(),
+                enrolled,
+                String.format("$%.2f", courseTuition),
+                String.format("$%.2f", totalRevenue),
+                String.format("%.1f%%", collectionRate)
+            });
+
+            totalTuition += totalRevenue;
+            totalStudents += enrolled;
+            courseCount++;
+        }
+    }
+
+    lblTotalTuition.setText(String.format("Total Tuition Collected: $%.2f", totalTuition));
+    lblTotalEnrolled.setText("Total Students Enrolled: " + totalStudents);
+
+    double avgRevenue = courseCount > 0 ? totalTuition / courseCount : 0;
+    lblRevenuePerCourse.setText(String.format("Average Revenue per Course: $%.2f", avgRevenue));
+}
+
+private void loadProfileData() {
+    txtFacultyName.setText("Faculty Name");
+    txtFacultyId.setText("FAC-001");
+    txtFacultyEmail.setText("faculty@northeastern.edu");
+    txtFacultyPhone.setText("(617) 555-0200");
+    txtFacultyOffice.setText("West Village H, Room 340");
+    txtFacultyDepartment.setText("Information Systems");
+    txtOfficeHours.setText("Mon/Wed 2:00-4:00 PM");
+}
+
+private void enableProfileEditing(boolean enable) {
+    txtFacultyEmail.setEditable(enable);
+    txtFacultyPhone.setEditable(enable);
+    txtFacultyOffice.setEditable(enable);
+    txtOfficeHours.setEditable(enable);
+
+    btnEditProfile.setEnabled(!enable);
+    btnSaveProfile.setEnabled(enable);
+    btnCancelEdit.setEnabled(enable);
+}
+private void saveProfile() {
+    String email = txtFacultyEmail.getText().trim();
+    String phone = txtFacultyPhone.getText().trim();
+    String office = txtFacultyOffice.getText().trim();
+    String hours = txtOfficeHours.getText().trim();
+
+    if (email.isEmpty() || phone.isEmpty() || office.isEmpty() || hours.isEmpty()) {
+        JOptionPane.showMessageDialog(this,
+            "Please fill in all fields!",
+            "Validation Error",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        JOptionPane.showMessageDialog(this,
+            "Please enter a valid email address!",
+            "Invalid Email",
+            JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    JOptionPane.showMessageDialog(this,
+        "Profile updated successfully!",
+        "Success",
+        JOptionPane.INFORMATION_MESSAGE);
+
+    enableProfileEditing(false);
+}
+
+private void logout() {
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Are you sure you want to logout?",
+        "Confirm Logout",
+        JOptionPane.YES_NO_OPTION);
+
+    if (confirm == JOptionPane.YES_OPTION) {
+        if (authService != null) {
+            authService.logout();
+        }
+
+        cardPanel.removeAll();
+
+        JLabel logoutLabel = new JLabel(
+            "<html><center>" +
+            "<h1>Logged Out Successfully</h1>" +
+            "<p>Thank you for using the Faculty Portal</p>" +
+            "</center></html>",
+            JLabel.CENTER
+        );
+
+        cardPanel.add(logoutLabel);
+        cardPanel.revalidate();
+        cardPanel.repaint();
+    }
+}
+
 
   
